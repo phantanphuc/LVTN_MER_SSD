@@ -55,7 +55,7 @@ class VGGPretrain(nn.Module):
 		self.Conv2d_11 = nn.Conv2d(512, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 		self.relu_11 = nn.ReLU(True)
 	
-		self.fc_1 = nn.Linear(23104, 512)
+		self.fc_1 = nn.Linear(4096, 512)
 		self.fc_2 = nn.Linear(512, self.num_of_class)
 		
 		

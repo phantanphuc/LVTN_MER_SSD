@@ -41,10 +41,10 @@ print('==> Preparing data..')
 transform = transforms.Compose([transforms.ToTensor(),
 								transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
-trainset = ListDataset(root='./dataset/train/', list_file='./pretraindataconfig/filepath_train.sources.txt', transform=transform)
+trainset = ListDataset(root='./dataset/train/', list_file='./pretraindataconfig/train_path.txt', transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=p_batch_size, shuffle=True)
 
-testset = ListDataset(root='./dataset/test/', list_file='./pretraindataconfig/filepath_test.sources.txt', transform=transform)
+testset = ListDataset(root='./dataset/test/', list_file='./pretraindataconfig/test_path.txt', transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=p_batch_size, shuffle=False)
 
 
@@ -87,13 +87,11 @@ def train(epoch):
 		images = Variable(images)
 		label = Variable(label)
 
+		
 		optimizer.zero_grad()
 		pred = net(images)
 		
-
 		label = label.view(p_batch_size)
-		
-		#quit()
 		
 		loss = criterion(pred, label)
 		
