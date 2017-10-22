@@ -20,12 +20,14 @@ from datagen import ListDataset
 from torch.autograd import Variable
 
 import cv2
+import pdb
+import matplotlib.pyplot as plt
 
 ##################### PARAMETER DIFINITION #############################
 p_batch_size = 2
 Continue_training = False
 lr = 0.001
-epoch_count = 10
+epoch_count = 1
 ########################################################################
 
 
@@ -35,16 +37,17 @@ epoch_count = 10
 use_cuda = False
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
-
+all_loss = []
+all_testloss=[]
 # Data
 print('==> Preparing data..')
 transform = transforms.Compose([transforms.ToTensor(),
 								transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
-trainset = ListDataset(root='./dataset/train/', list_file='./pretraindataconfig/train_path.txt', transform=transform)
+trainset = ListDataset(root='./zipdataset/train/', list_file='./pretraindataconfig/train_path.txt', transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=p_batch_size, shuffle=True)
 
-testset = ListDataset(root='./dataset/test/', list_file='./pretraindataconfig/test_path.txt', transform=transform)
+testset = ListDataset(root='./zipdataset/test/', list_file='./pretraindataconfig/test_path.txt', transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=p_batch_size, shuffle=False)
 
 
@@ -87,7 +90,7 @@ def train(epoch):
 		images = Variable(images)
 		label = Variable(label)
 
-		
+#		pdb.set_trace()
 		optimizer.zero_grad()
 		pred = net(images)
 		
@@ -100,7 +103,14 @@ def train(epoch):
 		optimizer.step()
 
 		train_loss += loss.data[0]
-		print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
+		if batch_idx%10==9:
+			all_loss.append(train_loss/(batch_idx+1))
+			plt.ion()
+			plt.plot(all_loss)
+			plt.savefig('figures/tmp_train.png')
+#		
+		print('[E %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], train_loss/(batch_idx+1)))
+#		print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
 		
 		
 
@@ -122,7 +132,13 @@ def test(epoch):
 		
 		loss = criterion(pred, label)
 		test_loss += loss.data[0]
-		print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))
+		if batch_idx%10==9:
+			all_testloss.append(test_loss/(batch_idx+1))
+			plt.ion()
+			plt.plot(all_testloss)
+			plt.savefig('figures/tmp_test.png')
+#		print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))
+			print('[E %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], test_loss/(batch_idx+1)))
 
 	global best_loss
 	test_loss /= len(testloader)
