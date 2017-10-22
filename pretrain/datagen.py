@@ -15,6 +15,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
+import pdb
 
 from PIL import Image, ImageOps
 
@@ -60,7 +61,7 @@ class ListDataset(data.Dataset):
         #quit()
 
         img = Image.open(os.path.join(self.root, fname))
-        
+#        pdb.set_trace()
        
 
         labels = self.labels[idx]

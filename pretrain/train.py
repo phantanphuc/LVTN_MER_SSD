@@ -27,18 +27,22 @@ import matplotlib.pyplot as plt
 p_batch_size = 2
 Continue_training = False
 lr = 0.001
-epoch_count = 1
+epoch_count = 3
 ########################################################################
 
 
 
 
 #use_cuda = torch.cuda.is_available()
+train_ite = 0
+test_ite = 0
 use_cuda = False
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
 all_loss = []
 all_testloss=[]
+
+
 # Data
 print('==> Preparing data..')
 transform = transforms.Compose([transforms.ToTensor(),
@@ -78,10 +82,12 @@ optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
 
 # Training
 def train(epoch):
+	
 	print('\nEpoch: %d' % epoch)
 	net.train()
 	train_loss = 0
 	br = 0
+	global train_ite
 	for batch_idx, (images, label) in enumerate(trainloader):
 		if use_cuda:
 			images = images.cuda()
@@ -93,7 +99,7 @@ def train(epoch):
 #		pdb.set_trace()
 		optimizer.zero_grad()
 		pred = net(images)
-		
+#		pdb.set_trace()
 		label = label.view(p_batch_size)
 		
 		loss = criterion(pred, label)
@@ -103,19 +109,21 @@ def train(epoch):
 		optimizer.step()
 
 		train_loss += loss.data[0]
-		if batch_idx%10==9:
+#		pdb.set_trace()
+		if train_ite%1==0:
 			all_loss.append(train_loss/(batch_idx+1))
 			plt.ion()
 			plt.plot(all_loss)
+			plt.draw()
 			plt.savefig('figures/tmp_train.png')
 #		
 		print('[E %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], train_loss/(batch_idx+1)))
 #		print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
-		
-		
+		train_ite+=1
+		print(train_ite)
 
 def test(epoch):
-
+	global test_ite
 	net.eval()
 	test_loss = 0
 	for batch_idx, (images, label) in enumerate(trainloader):
@@ -132,14 +140,16 @@ def test(epoch):
 		
 		loss = criterion(pred, label)
 		test_loss += loss.data[0]
-		if batch_idx%10==9:
+		if test_ite%10==9:
 			all_testloss.append(test_loss/(batch_idx+1))
 			plt.ion()
 			plt.plot(all_testloss)
 			plt.savefig('figures/tmp_test.png')
 #		print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))
-			print('[E %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], test_loss/(batch_idx+1)))
-
+		print('[E %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], test_loss/(batch_idx+1)))
+		test_ite+=1
+		print(test_ite)
+		
 	global best_loss
 	test_loss /= len(testloader)
 	if test_loss < best_loss:
@@ -157,6 +167,7 @@ def test(epoch):
 
 
 for epoch in range(start_epoch, start_epoch + epoch_count):
+	
 	train(epoch)
 	test(epoch)
 	
