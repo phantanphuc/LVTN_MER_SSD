@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 ##################### PARAMETER DIFINITION #############################
 p_batch_size = 2
-Continue_training = False
+Continue_training = True
 lr = 0.001
 epoch_count = 3
 ########################################################################
@@ -57,10 +57,28 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=p_batch_size, shuff
 
 # Model
 net = VGGPretrain()
+#state = {
+#	'net': net.state_dict(),
+#	'loss': 1,
+#	'epoch': 1,
+#}
+#
+#torch.save(state, './checkpoint/temppp.pth')
+if use_cuda:
+	net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
+	net.cuda()
+	cudnn.benchmark = True
+	
 if Continue_training:
 	print('==> Resuming from checkpoint..')
-	checkpoint = torch.load('./checkpoint/ckpt0.pth')
-	net.load_state_dict(checkpoint['net'])
+	checkpoint = torch.load('./checkpoint/pretrain1.pth')
+#	for e in checkpoint:
+#		print(e)
+#		pdb.set_trace()
+	a = net.load_state_dict(checkpoint['net'])
+	for e, v in enumerate(checkpoint['net']):
+		print(v)
+		pdb.set_trace()
 	best_loss = checkpoint['loss']
 	start_epoch = checkpoint['epoch']
 else:
@@ -71,10 +89,7 @@ else:
 criterion = nn.NLLLoss()
 m = nn.LogSoftmax()
 
-if use_cuda:
-	net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
-	net.cuda()
-	cudnn.benchmark = True
+
 
 optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
 
@@ -126,7 +141,7 @@ def test(epoch):
 	global test_ite
 	net.eval()
 	test_loss = 0
-	for batch_idx, (images, label) in enumerate(trainloader):
+	for batch_idx, (images, label) in enumerate(testloader):
 		if use_cuda:
 			images = images.cuda()
 			label = label.cuda()
