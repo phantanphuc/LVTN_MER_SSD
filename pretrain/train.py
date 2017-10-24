@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 
 ##################### PARAMETER DIFINITION #############################
 p_batch_size = 2
-Continue_training = True
+Continue_training = False 
 lr = 0.001
 epoch_count = 3
 ########################################################################
@@ -76,9 +76,9 @@ if Continue_training:
 #		print(e)
 #		pdb.set_trace()
 	a = net.load_state_dict(checkpoint['net'])
-	for e, v in enumerate(checkpoint['net']):
-		print(v)
-		pdb.set_trace()
+#	for e, v in enumerate(checkpoint['net']):
+#		print(v)
+#		pdb.set_trace()
 	best_loss = checkpoint['loss']
 	start_epoch = checkpoint['epoch']
 else:
@@ -97,12 +97,14 @@ optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
 
 # Training
 def train(epoch):
-	
+#	all_loss = []
 	print('\nEpoch: %d' % epoch)
 	net.train()
 	train_loss = 0
 	br = 0
-	global train_ite
+	global train_ite, all_loss
+	if epoch%1==0:
+		all_loss = []
 	for batch_idx, (images, label) in enumerate(trainloader):
 		if use_cuda:
 			images = images.cuda()
@@ -125,9 +127,11 @@ def train(epoch):
 
 		train_loss += loss.data[0]
 #		pdb.set_trace()
+		plt.ion()
 		if train_ite%1==0:
 			all_loss.append(train_loss/(batch_idx+1))
-			plt.ion()
+			
+			plt.clf()
 			plt.plot(all_loss)
 			plt.draw()
 			plt.savefig('figures/tmp_train.png')
@@ -138,7 +142,10 @@ def train(epoch):
 		print(train_ite)
 
 def test(epoch):
-	global test_ite
+#	all_testloss = []
+	global test_ite, all_testloss
+	if epoch%1==0:
+		all_testloss = []
 	net.eval()
 	test_loss = 0
 	for batch_idx, (images, label) in enumerate(testloader):
@@ -155,9 +162,10 @@ def test(epoch):
 		
 		loss = criterion(pred, label)
 		test_loss += loss.data[0]
+		plt.ion()
 		if test_ite%10==9:
 			all_testloss.append(test_loss/(batch_idx+1))
-			plt.ion()
+			plt.clf()
 			plt.plot(all_testloss)
 			plt.savefig('figures/tmp_test.png')
 #		print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))

@@ -117,7 +117,7 @@ class VGGPretrain(nn.Module):
 				in_channels = x
 		return nn.Sequential(*layers)
 
-a = VGGPretrain()
+#a = VGGPretrain()
 		
 class SSD300(nn.Module):
 	input_size = 300
