@@ -98,7 +98,7 @@ class VGGPretrain(nn.Module):
 		h = self.fc_2(h)
 
 		# if not use nlllose -> use softmax here!
-		return F.log_softmax(h)
+		#return F.log_softmax(h)
 		
 		return h
 		
@@ -117,7 +117,7 @@ class VGGPretrain(nn.Module):
 				in_channels = x
 		return nn.Sequential(*layers)
 
-a = VGGPretrain()
+#a = VGGPretrain()
 		
 class SSD300(nn.Module):
 	input_size = 300

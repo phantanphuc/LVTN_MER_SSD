@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 ##################### PARAMETER DIFINITION #############################
 p_batch_size = 2
-Continue_training = False
+Continue_training = False 
 lr = 0.001
 epoch_count = 30
 ########################################################################
@@ -40,8 +40,7 @@ test_ite = 0
 use_cuda = False
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
-all_loss = []
-all_testloss=[]
+
 
 
 # Data
@@ -59,11 +58,16 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=p_batch_size, shuff
 # Model
 
 
-if True:
+if False:
 	net = VGGPretrain()
 else:
-	net = 
+	net = vgg16_bn(False)
 
+if use_cuda:
+	net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
+	net.cuda()
+	cudnn.benchmark = True
+	
 if Continue_training:
 	print('==> Resuming from checkpoint..')
 	checkpoint = torch.load('./checkpoint/ckpt0.pth')
@@ -76,12 +80,9 @@ else:
 	#net.load_state_dict(torch.load('./model/ssd.pth'))
 
 criterion = nn.NLLLoss()
-m = nn.LogSoftmax()
+sm = nn.LogSoftmax()
 
-if use_cuda:
-	net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
-	net.cuda()
-	cudnn.benchmark = True
+
 
 optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
 
@@ -107,7 +108,10 @@ def try_print(print_flag = True):
 
 # Training
 def train(epoch):
-	
+
+	all_loss = []
+	all_testloss=[]
+
 	print('\nEpoch: %d' % epoch)
 	net.train()
 	train_loss = 0
@@ -127,9 +131,9 @@ def train(epoch):
 #		pdb.set_trace()
 		label = label.view(p_batch_size)
 		
-		loss = criterion(pred, label)
+		loss = criterion(sm(pred), label)
 		
-		try_print()
+		#try_print()
 		loss.backward()
 		optimizer.step()
 
@@ -137,7 +141,8 @@ def train(epoch):
 #		pdb.set_trace()
 		if train_ite%1==2:
 			all_loss.append(train_loss/(batch_idx+1))
-			plt.ion()
+			
+			plt.clf()
 			plt.plot(all_loss)
 			plt.draw()
 			plt.savefig('figures/tmp_train.png')
@@ -148,10 +153,13 @@ def train(epoch):
 		print(train_ite)
 
 def test(epoch):
+	all_loss = []
+	all_testloss=[]
 	global test_ite
+
 	net.eval()
 	test_loss = 0
-	for batch_idx, (images, label) in enumerate(trainloader):
+	for batch_idx, (images, label) in enumerate(testloader):
 		if use_cuda:
 			images = images.cuda()
 			label = label.cuda()
@@ -163,11 +171,11 @@ def test(epoch):
 		
 		label = label.view(p_batch_size)
 		
-		loss = criterion(pred, label)
+		loss = criterion(sm(pred), label)
 		test_loss += loss.data[0]
 		if test_ite%1==3:
 			all_testloss.append(test_loss/(batch_idx+1))
-			plt.ion()
+			plt.clf()
 			plt.plot(all_testloss)
 			plt.savefig('figures/tmp_test.png')
 #		print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))
