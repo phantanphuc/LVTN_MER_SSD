@@ -98,7 +98,7 @@ class VGGPretrain(nn.Module):
 		h = self.fc_2(h)
 
 		# if not use nlllose -> use softmax here!
-		return F.log_softmax(h)
+		#return F.log_softmax(h)
 		
 		return h
 		
