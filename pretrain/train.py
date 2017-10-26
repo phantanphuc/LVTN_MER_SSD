@@ -48,10 +48,10 @@ print('==> Preparing data..')
 transform = transforms.Compose([transforms.ToTensor(),
 								transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
-trainset = ListDataset(root='./dataset/train/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
+trainset = ListDataset(root='./zipdataset/train/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=p_batch_size, shuffle=True)
 
-testset = ListDataset(root='./dataset/test/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
+testset = ListDataset(root='./zipdataset/test/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=p_batch_size, shuffle=False)
 
 
@@ -62,6 +62,7 @@ if False:
 	net = VGGPretrain()
 else:
 	net = vgg16_bn(False)
+	print(vgg16_bn(False))
 
 if use_cuda:
 	net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
@@ -79,8 +80,8 @@ else:
 	pass
 	#net.load_state_dict(torch.load('./model/ssd.pth'))
 
-criterion = nn.NLLLoss()
-sm = nn.LogSoftmax()
+criterion = nn.CrossEntropyLoss()
+#sm = nn.LogSoftmax()
 
 
 
@@ -90,8 +91,9 @@ optimizer = optim.SGD(net.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
 def try_print(print_flag = True):
 	params = [p for p in list(net.parameters()) if p.requires_grad==True]
 	for p in params:
+		print(p)
 		p_grad = p.grad 
-		
+		pdb.set_trace()
 		try:
 			if print_flag:
 				print ('exist')
@@ -131,7 +133,7 @@ def train(epoch):
 #		pdb.set_trace()
 		label = label.view(p_batch_size)
 		
-		loss = criterion(sm(pred), label)
+		loss = criterion(pred, label)
 		
 		#try_print()
 		loss.backward()
@@ -171,7 +173,7 @@ def test(epoch):
 		
 		label = label.view(p_batch_size)
 		
-		loss = criterion(sm(pred), label)
+		loss = criterion(pred, label)
 		test_loss += loss.data[0]
 		if test_ite%1==3:
 			all_testloss.append(test_loss/(batch_idx+1))
@@ -200,7 +202,7 @@ def test(epoch):
 
 
 for epoch in range(start_epoch, start_epoch + epoch_count):
-	
+#	try_print()
 	train(epoch)
 	test(epoch)
 	

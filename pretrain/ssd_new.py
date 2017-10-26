@@ -5,7 +5,7 @@ import math
 
 class VGG(nn.Module):
 
-    def __init__(self, features, num_classes=100):
+    def __init__(self, features, num_classes=106):
         super(VGG, self).__init__()
         self.features = features
         self.classifier = nn.Sequential(

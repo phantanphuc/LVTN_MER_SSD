@@ -13,7 +13,7 @@ class VGGPretrain(nn.Module):
 	def __init__(self):
 		super(VGGPretrain, self).__init__()
 		
-		self.num_of_class = 114
+		self.num_of_class = 106
 		
 		
 		

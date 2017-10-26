@@ -20,7 +20,8 @@ from scipy import misc
 #              [0, 0, 0, 0, 0, 0, 0],
 #              [0, 0, 1, 1, 1, 0, 0]])  # Second object here
 # Label objects
-a = misc.imread('./img1.jpg')
+a = misc.imread('./abc.png')
+pdb.set_trace()
 labeled_image, num_features = ndimage.label(a)
 # Find the location of all objects
 objs = ndimage.find_objects(labeled_image)
