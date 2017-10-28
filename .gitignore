@@ -175,3 +175,6 @@
 /pretrain/dataset/train/zY/*.png
 /pretrain/dataset/train/zZ/*.png
 /pretrain/__pycache__/*.pyc
+/pretrain/checkpoint/pretrain2.pth
+/pretrain/checkpoint/pretrain0.pth
+/pretrain/checkpoint/pretrain1.pth
