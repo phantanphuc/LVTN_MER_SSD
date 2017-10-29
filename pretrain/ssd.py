@@ -27,7 +27,7 @@ class VGGPretrain(nn.Module):
 
 	def initNetork(self):
 	############# VGG ########################
-		self.Conv2d_1 = nn.Conv2d(3, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+		self.Conv2d_1 = nn.Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 		self.relu_1 = nn.ReLU(True)
 		self.Conv2d_2 = nn.Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
 		self.relu_2 = nn.ReLU(True)
@@ -98,7 +98,7 @@ class VGGPretrain(nn.Module):
 		h = self.fc_2(h)
 
 		# if not use nlllose -> use softmax here!
-		#return F.log_softmax(h)
+		return F.log_softmax(h)
 		
 		return h
 		
@@ -117,7 +117,7 @@ class VGGPretrain(nn.Module):
 				in_channels = x
 		return nn.Sequential(*layers)
 
-#a = VGGPretrain()
+a = VGGPretrain()
 		
 class SSD300(nn.Module):
 	input_size = 300

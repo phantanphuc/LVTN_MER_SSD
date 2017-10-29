@@ -15,7 +15,6 @@ import numpy as np
 import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
-import pdb
 
 from PIL import Image, ImageOps
 
@@ -61,7 +60,7 @@ class ListDataset(data.Dataset):
         #quit()
 
         img = Image.open(os.path.join(self.root, fname))
-#        pdb.set_trace()
+        
        
 
         labels = self.labels[idx]
@@ -70,8 +69,6 @@ class ListDataset(data.Dataset):
 
         #cv2.imshow('aaa', img.numpy()[0])
         #cv2.waitKey()
-
-
 
         # Encode loc & conf targets.
         #loc_target, conf_target = self.data_encoder.encode(boxes, labels)

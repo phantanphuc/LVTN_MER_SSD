@@ -23,12 +23,12 @@ from torch.autograd import Variable
 import cv2
 import pdb
 import matplotlib.pyplot as plt
-
+import numpy as np 
 ##################### PARAMETER DIFINITION #############################
 p_batch_size = 2
 Continue_training = False 
 lr = 0.001
-epoch_count = 1
+epoch_count = 1 
 ########################################################################
 
 
@@ -37,9 +37,9 @@ epoch_count = 1
 #use_cuda = torch.cuda.is_available()
 train_ite = 0
 test_ite = 0
-use_cuda = False
+use_cuda = True
 best_loss = float('inf')  # best test loss
-start_epoch = 0  # start from epoch 0 or last epoch
+start_epoch = 0   # start from epoch 0 or last epoch
 
 
 
@@ -62,18 +62,19 @@ if False:
 	net = VGGPretrain()
 else:
 	net = vgg16_bn(False)
+	#print(vgg16_bn(False))
 
 if use_cuda:
-	net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
+	net = torch.nn.DataParallel(net)
 	net.cuda()
 	cudnn.benchmark = True
 	
 if Continue_training:
 	print('==> Resuming from checkpoint..')
-	checkpoint = torch.load('./checkpoint/ckpt0.pth')
+	checkpoint = torch.load('./checkpoint/pretrain2910_5.pth')
 	net.load_state_dict(checkpoint['net'])
 	best_loss = checkpoint['loss']
-	start_epoch = checkpoint['epoch']
+	start_epoch = checkpoint['epoch']+1
 else:
 	# Convert from pretrained VGG model.
 	pass
@@ -111,7 +112,7 @@ def try_print(print_flag = True):
 def train(epoch):
 
 	all_loss = []
-	all_testloss=[]
+	
 
 	print('\nEpoch: %d' % epoch)
 	net.train()
@@ -140,7 +141,7 @@ def train(epoch):
 
 		train_loss += loss.data[0]
 #		pdb.set_trace()
-		if train_ite%1==2:
+		if train_ite%700==699:
 			all_loss.append(train_loss/(batch_idx+1))
 			
 			plt.clf()
@@ -151,13 +152,12 @@ def train(epoch):
 		print('[E %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], train_loss/(batch_idx+1)))
 #		print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
 		train_ite+=1
-		print(train_ite)
-
+		#print(train_ite)
+#correct = 0 
 def test(epoch):
-	all_loss = []
 	all_testloss=[]
 	global test_ite
-
+	global correct 
 	net.eval()
 	test_loss = 0
 	for batch_idx, (images, label) in enumerate(testloader):
@@ -174,15 +174,22 @@ def test(epoch):
 		
 		loss = criterion(pred, label)
 		test_loss += loss.data[0]
-		if test_ite%1==3:
+		if test_ite%700==699:
 			all_testloss.append(test_loss/(batch_idx+1))
 			plt.clf()
 			plt.plot(all_testloss)
 			plt.savefig('figures/tmp_test.png')
 #		print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))
-		print('[E %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], test_loss/(batch_idx+1)))
+		print('[ETe %d, I %d]: %.3f, %.3f' % (epoch,batch_idx, loss.data[0], test_loss/(batch_idx+1)))
+		#s_pred = np.argmax(pred.cpu().data.numpy(),axis = 1)
+		#s_label = label.cpu().data.numpy()
+		#print('pred', s_pred)
+		#print('label', s_label)	
+		#if (s_pred != s_label).any():
+			#correct+=1
+
 		test_ite+=1
-		print(test_ite)
+		#print(test_ite)
 		
 	global best_loss
 	test_loss /= len(testloader)
@@ -195,7 +202,7 @@ def test(epoch):
 		}
 		if not os.path.isdir('checkpoint'):
 			os.mkdir('checkpoint')
-		torch.save(state, './checkpoint/pretrain_test_off' + str(epoch) + '.pth')
+		torch.save(state, './checkpoint/pretrain' +'2910_'+ str(epoch) + '.pth')
 		best_loss = test_loss
 
 
@@ -204,4 +211,4 @@ for epoch in range(start_epoch, start_epoch + epoch_count):
 #	try_print()
 	train(epoch)
 	test(epoch)
-	
+#print('cor', correct)	
