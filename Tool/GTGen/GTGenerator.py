@@ -180,24 +180,31 @@ class MainWindow:
 		tl_x = 0
 		tl_y = 0
 		
+		br_x = 0
+		br_y = 0
+
 		w = abs(event.x - self.topleft[0])
 		h = abs(event.y - self.topleft[1])
 		
 		if self.topleft[0] < event.x:
 			tl_x = self.topleft[0]
+			br_x = event.x
 		else:
+			br_x = self.topleft[0]
 			tl_x = event.x
 		
 		if self.topleft[1] < event.y:
 			tl_y = self.topleft[1]
+			br_y = event.y
 		else:
+			br_y = self.topleft[1]
 			tl_y = event.y
 		
 		label = self.LabelEntry.get("1.0",tkinter.END)
 		label_idx = self.dictionary[label.replace('\n', '')]
 		
 		
-		insert_text = str(tl_x) + ' ' + str(tl_y) + ' ' + str(w) + ' ' + str(h) + ' '
+		insert_text = str(tl_x) + ' ' + str(tl_y) + ' ' + str(br_x) + ' ' + str(br_y) + ' '
 		insert_text = insert_text + str(label_idx) + ' '
 		self.output_content.insert(tkinter.INSERT, insert_text)
 		
