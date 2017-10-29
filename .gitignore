@@ -178,3 +178,6 @@
 /pretrain/checkpoint/pretrain2.pth
 /pretrain/checkpoint/pretrain0.pth
 /pretrain/checkpoint/pretrain1.pth
+/Network/checkpoint/ckpt.pth
+/Network/checkpoint/ssd.pth
+/Network/__pycache__/*.pyc
