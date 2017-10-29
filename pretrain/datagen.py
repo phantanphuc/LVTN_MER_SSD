@@ -71,6 +71,8 @@ class ListDataset(data.Dataset):
         #cv2.imshow('aaa', img.numpy()[0])
         #cv2.waitKey()
 
+
+
         # Encode loc & conf targets.
         #loc_target, conf_target = self.data_encoder.encode(boxes, labels)
         return img, labels#, conf_target

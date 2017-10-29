@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 p_batch_size = 2
 Continue_training = False 
 lr = 0.001
-epoch_count = 30
+epoch_count = 1
 ########################################################################
 
 
@@ -48,10 +48,10 @@ print('==> Preparing data..')
 transform = transforms.Compose([transforms.ToTensor(),
 								transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
-trainset = ListDataset(root='./zipdataset/train/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
+trainset = ListDataset(root='./dataset/train/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=p_batch_size, shuffle=True)
 
-testset = ListDataset(root='./zipdataset/test/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
+testset = ListDataset(root='./dataset/train/', list_file='./pretraindataconfig/train_patha.txt', transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=p_batch_size, shuffle=False)
 
 
@@ -62,7 +62,6 @@ if False:
 	net = VGGPretrain()
 else:
 	net = vgg16_bn(False)
-	print(vgg16_bn(False))
 
 if use_cuda:
 	net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
@@ -196,7 +195,7 @@ def test(epoch):
 		}
 		if not os.path.isdir('checkpoint'):
 			os.mkdir('checkpoint')
-		torch.save(state, './checkpoint/pretrain' + str(epoch) + '.pth')
+		torch.save(state, './checkpoint/pretrain_test_off' + str(epoch) + '.pth')
 		best_loss = test_loss
 
 
