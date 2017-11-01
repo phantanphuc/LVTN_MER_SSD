@@ -22,13 +22,14 @@ class MainWindow:
 		self.done_file_list = []
 		self.current_folder = ''
 		self.current_rect = []
-		self.camvas_border = 10
+		self.camvas_border = 0
 		
 		self.dictionary = {}
 		self.dictionary_loaded = False
 		
 		self.writting_line = ''
 		self.BB_count = 0
+		self.last_BB = ''
 		
 		#####################
 		
@@ -91,7 +92,7 @@ class MainWindow:
 		
 		##### IMG
 		
-		img_frame = tkinter.Frame(master=self.mainHandle, bd = 10)
+		img_frame = tkinter.Frame(master=self.mainHandle, bd = 0)
 		img_frame.pack(fill=tkinter.BOTH)
 	
 		
@@ -101,7 +102,7 @@ class MainWindow:
 		self.img_holder = tkinter.Label(img_frame, image = self.img, borderwidth=10, relief="raised")
 		#self.img_holder.pack(side = tkinter.LEFT)
 
-		self.img_canvas = tkinter.Canvas(img_frame, height=256, width=512, borderwidth=self.camvas_border, relief="raised")
+		self.img_canvas = tkinter.Canvas(img_frame, height=256, width=512)#, borderwidth=self.camvas_border, relief="raised")
 		self.img_canvas.pack(side = tkinter.LEFT)
 		self.img_canvas.bind("<Button-1>", self.mouseEventDown)
 		self.img_canvas.bind("<ButtonRelease-1>", self.mouseEventUp)
@@ -165,7 +166,7 @@ class MainWindow:
 			tkinter.messagebox.showinfo("Error", "Please enter label")
 			return
 			
-		print ("clicked at", event.x, event.y)
+		#print ("clicked at", event.x, event.y)
 		self.isDragging = True
 		self.topleft = (event.x, event.y)
 
@@ -206,6 +207,9 @@ class MainWindow:
 		
 		insert_text = str(tl_x) + ' ' + str(tl_y) + ' ' + str(br_x) + ' ' + str(br_y) + ' '
 		insert_text = insert_text + str(label_idx) + ' '
+		
+		self.last_BB = insert_text
+		
 		self.output_content.insert(tkinter.INSERT, insert_text)
 		
 		self.writting_line = self.writting_line + insert_text
@@ -219,8 +223,32 @@ class MainWindow:
 		self.current_rect = []
 		
 		
+	def undo(self, event=None):
+		if self.BB_count > 0 and self.last_BB != '':
+			self.BB_count = self.BB_count - 1
+			del_len = len(self.last_BB)
+			
+			print(self.last_BB)
+			
+			print(self.writting_line)
+			self.writting_line = self.writting_line[:-del_len]
+			
+			idx = self.output_content.index("end")
+			self.output_content.delete(str(int(idx.split('.')[0]) - 1) + '.0', str(int(idx.split('.')[0]) + 0) + '.0')
+		
+			if idx.split('.')[0] == '2':
+				self.output_content.insert(tkinter.END, self.writting_line)
+			else:
+				self.output_content.insert(tkinter.END, '\n' + self.writting_line)
+			
+			rect = self.current_rect.pop()
+			self.img_canvas.delete(rect)
+			
+			self.last_BB = ''
+		
 	def initKeyBinding(self):
 		self.mainHandle.bind('<Escape>', self.close)
+		self.mainHandle.bind('<Control-z>', self.undo)
 		#self.mainHandle.bind('<a>', self.close)
 	
 	def NextCallback(self):
@@ -342,9 +370,10 @@ class MainWindow:
 
 			for line in linecontent:
 				fname = line[:line.find(' ')]
+				print(fname)
 				self.pending_file_list.remove(fname)
 				self.done_file_list.append(fname)
-				print(fname)
+				
 
 				self.output_content.insert(tkinter.END, line)
 
