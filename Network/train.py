@@ -28,6 +28,7 @@ from torch.autograd import Variable
 use_cuda = False#torch.cuda.is_available()
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
+epoch_count = 1
 
 learning_rate = 0.001
 resume = False
@@ -43,7 +44,7 @@ transform = transforms.Compose([transforms.ToTensor(),
 trainset = ListDataset(root='./dataset/train', list_file='./voc_data/mytrain.txt', train=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
 
-testset = ListDataset(root='./dataset/train', list_file='./voc_data/mytrain.txt', train=False, transform=transform)
+testset = ListDataset(root='./dataset/train', list_file='./voc_data/ver_10.txt', train=False, transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
 
 
@@ -62,7 +63,7 @@ if resume:
     start_epoch = checkpoint['epoch']
 else:
     
-    net.load_state_dict(torch.load('./checkpoint/ssd.pth'))
+    net.load_state_dict(torch.load('./checkpoint/ssd_convert.pth'))
 
 criterion = MultiBoxLoss()
 
@@ -132,6 +133,6 @@ def test(epoch):
         best_loss = test_loss
 
 
-for epoch in range(start_epoch, start_epoch+1):
+for epoch in range(start_epoch, start_epoch + epoch_count):
     train(epoch)
     test(epoch)

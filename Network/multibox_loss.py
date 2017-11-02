@@ -9,9 +9,10 @@ import torch.nn.functional as F
 
 from torch.autograd import Variable
 
+import NetworkConfig
 
 class MultiBoxLoss(nn.Module):
-    num_classes = 21
+    num_classes = NetworkConfig.NUM_OF_CLASSES
 
     def __init__(self):
         super(MultiBoxLoss, self).__init__()
@@ -26,6 +27,12 @@ class MultiBoxLoss(nn.Module):
         Return:
           (tensor) cross entroy loss, sized [N,].
         '''
+
+        #print('-------------')
+        #print(x.data.numpy().shape)
+        #print(y.data.numpy().shape)
+        #print(x.gather(1, y.view(-1,1)).data.numpy().shape)
+
         xmax = x.data.max()
         log_sum_exp = torch.log(torch.sum(torch.exp(x-xmax), 1)) + xmax
         return log_sum_exp - x.gather(1, y.view(-1,1))
@@ -92,6 +99,7 @@ class MultiBoxLoss(nn.Module):
         # conf_loss = CrossEntropyLoss(pos_conf_preds, pos_conf_targets)
         #           + CrossEntropyLoss(neg_conf_preds, neg_conf_targets)
         ################################################################
+        #print(conf_preds.data.numpy().shape)
         conf_loss = self.cross_entropy_loss(conf_preds.view(-1,self.num_classes), \
                                             conf_targets.view(-1))  # [N*8732,]
         neg = self.hard_negative_mining(conf_loss, pos)    # [N,8732]

@@ -9,9 +9,10 @@ import torch.nn.functional as F
 
 from torch.autograd import Variable
 
+import NetworkConfig
 
 class MultiBoxLayer(nn.Module):
-    num_classes = 21
+    num_classes = NetworkConfig.NUM_OF_CLASSES
     num_anchors = [4,6,6,6,4,4]
     in_planes = [512,1024,512,256,256,256]
 
@@ -22,7 +23,7 @@ class MultiBoxLayer(nn.Module):
         self.conf_layers = nn.ModuleList()
         for i in range(len(self.in_planes)):
         	self.loc_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*4, kernel_size=3, padding=1))
-        	self.conf_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*21, kernel_size=3, padding=1))
+        	self.conf_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*NetworkConfig.NUM_OF_CLASSES, kernel_size=3, padding=1))
 
     def forward(self, xs):
         '''
@@ -44,7 +45,7 @@ class MultiBoxLayer(nn.Module):
 
             y_conf = self.conf_layers[i](x)
             y_conf = y_conf.permute(0,2,3,1).contiguous()
-            y_conf = y_conf.view(N,-1,21)
+            y_conf = y_conf.view(N,-1,NetworkConfig.NUM_OF_CLASSES)
             y_confs.append(y_conf)
 
         loc_preds = torch.cat(y_locs, 1)

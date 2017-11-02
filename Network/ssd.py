@@ -92,6 +92,7 @@ class SSD300(nn.Module):
         hs.append(h)  # conv11_2
 
         loc_preds, conf_preds = self.multibox(hs)
+
         return loc_preds, conf_preds
 
     def VGG16(self):
