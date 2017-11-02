@@ -181,3 +181,4 @@
 /Network/checkpoint/ckpt.pth
 /Network/checkpoint/ssd.pth
 /Network/__pycache__/*.pyc
+/Network/checkpoint/ssd_convert.pth
