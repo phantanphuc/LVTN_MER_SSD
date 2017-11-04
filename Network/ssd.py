@@ -10,6 +10,7 @@ from torch.autograd import Variable
 
 from multibox_layer import MultiBoxLayer
 
+import NetworkConfig
 
 class L2Norm2d(nn.Module):
     '''L2Norm layer across all channels.'''
@@ -19,8 +20,10 @@ class L2Norm2d(nn.Module):
 
     def forward(self, x, dim=1):
         '''out = scale * x / sqrt(\sum x_i^2)'''
-        return self.scale * x * x.pow(2).sum(dim).clamp(min=1e-12).rsqrt().expand_as(x)
-
+        if NetworkConfig.IS_USING_PYTHON_2:
+            return self.scale * x * x.pow(2).sum(dim).clamp(min=1e-12).rsqrt().unsqueeze(1).expand_as(x)
+        else:
+            return self.scale * x * x.pow(2).sum(dim).clamp(min=1e-12).rsqrt().expand_as(x)
 
 class SSD300(nn.Module):
 

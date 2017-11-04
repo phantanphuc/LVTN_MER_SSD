@@ -25,15 +25,15 @@ from torch.autograd import Variable
 
 ############ PARAM #########################3333
 
-use_cuda = False#torch.cuda.is_available()
+use_cuda = True#torch.cuda.is_available()
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
-epoch_count = 1
+epoch_count = 10
 
 learning_rate = 0.001
-resume = False
+resume = True
 
-batch_size = 1
+batch_size = 2
 ####################################################
 
 # Data
@@ -41,29 +41,33 @@ print('==> Preparing data..')
 transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
-trainset = ListDataset(root='./dataset/train', list_file='./voc_data/mytrain.txt', train=True, transform=transform)
+trainset = ListDataset(root='./dataset/train', list_file='./voc_data/validate_strim.txt', train=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
 
-testset = ListDataset(root='./dataset/train', list_file='./voc_data/ver_10.txt', train=False, transform=transform)
+testset = ListDataset(root='./dataset/train', list_file='./voc_data/validate_strim.txt', train=False, transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
 
 
 net = SSD300()
 
 if use_cuda:
-    net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
+    if resume:
+        pass
+        #net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
     net.cuda()
     cudnn.benchmark = True
 
 if resume:
     print('==> Resuming from checkpoint..')
-    checkpoint = torch.load('./checkpoint/ssd.pth')
+    checkpoint = torch.load('./checkpoint/trained.pth')
     net.load_state_dict(checkpoint['net'])
     best_loss = checkpoint['loss']
     start_epoch = checkpoint['epoch']
 else:
-    
-    net.load_state_dict(torch.load('./checkpoint/ssd_convert.pth'))
+    #print(torch.load('./model/ssd.pth').keys())
+
+    net.load_state_dict(torch.load('./model/ssd.pth'))
+
 
 criterion = MultiBoxLoss()
 
@@ -91,8 +95,10 @@ def train(epoch):
 
         loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
 
-        loss.backward()
-        
+        try:
+            loss.backward()
+        except:
+            print('err')
         optimizer.step()
 
         train_loss += loss.data[0]

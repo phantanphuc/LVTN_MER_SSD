@@ -76,16 +76,19 @@ class ListDataset(data.Dataset):
         '''
         # Load image and bbox locations.
         fname = self.fnames[idx]
+	
         ###############3
         img = Image.open(os.path.join(self.root, fname)).convert('L')
         #################
         boxes = self.boxes[idx].clone()
         labels = self.labels[idx]
 
+	#print(fname)
+
         # Data augmentation while training.
-        if self.train:
-            img, boxes = self.random_flip(img, boxes)
-            img, boxes, labels = self.random_crop(img, boxes, labels)
+        #if self.train:
+        #   img, boxes = self.random_flip(img, boxes)
+        #  img, boxes, labels = self.random_crop(img, boxes, labels)
 
         # Scale bbox locaitons to [0,1].
         w,h = img.size

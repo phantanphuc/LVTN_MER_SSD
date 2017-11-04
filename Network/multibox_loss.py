@@ -34,7 +34,14 @@ class MultiBoxLoss(nn.Module):
         #print(x.gather(1, y.view(-1,1)).data.numpy().shape)
 
         xmax = x.data.max()
-        log_sum_exp = torch.log(torch.sum(torch.exp(x-xmax), 1)) + xmax
+        
+        if NetworkConfig.IS_USING_PYTHON_2:
+            
+            log_sum_exp = torch.log(torch.sum(torch.exp(x-xmax), 1).view(-1, 1)) + xmax
+        else:
+            log_sum_exp = torch.log(torch.sum(torch.exp(x-xmax), 1)) + xmax
+
+
         return log_sum_exp - x.gather(1, y.view(-1,1))
 
     def test_cross_entropy_loss(self):
@@ -65,7 +72,11 @@ class MultiBoxLoss(nn.Module):
         num_pos = pos.long().sum(1)  # [N,1]
         num_neg = torch.clamp(3*num_pos, max=num_boxes-1)  # [N,1]
 
-        neg = rank < num_neg.expand_as(rank)  # [N,8732]
+        if NetworkConfig.IS_USING_PYTHON_2:
+            neg = rank < num_neg.view(batch_size, 1).expand_as(rank)  # [N,8732]
+        else:
+            neg = rank < num_neg.expand_as(rank)  # [N,8732]
+
         return neg
 
     def forward(self, loc_preds, loc_targets, conf_preds, conf_targets):
