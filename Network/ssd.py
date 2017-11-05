@@ -54,10 +54,14 @@ class SSD300(nn.Module):
         self.conv9_2 = nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=2)
 
         self.conv10_1 = nn.Conv2d(256, 128, kernel_size=1)
+        self.conv10_1_dp = nn.Dropout2d(p = 0.2)
         self.conv10_2 = nn.Conv2d(128, 256, kernel_size=3)
+        self.conv10_2_dp = nn.Dropout2d(p = 0.2)
 
         self.conv11_1 = nn.Conv2d(256, 128, kernel_size=1)
+        self.conv11_1_dp = nn.Dropout2d(p = 0.2)
         self.conv11_2 = nn.Conv2d(128, 256, kernel_size=3)
+        self.conv11_2_dp = nn.Dropout2d(p = 0.2)
 
         # multibox layer
         self.multibox = MultiBoxLayer()
@@ -87,11 +91,15 @@ class SSD300(nn.Module):
         hs.append(h)  # conv9_2
 
         h = F.relu(self.conv10_1(h))
+        h = self.conv10_1_dp(h)
         h = F.relu(self.conv10_2(h))
+        h = self.conv10_2_dp(h)
         hs.append(h)  # conv10_2
 
         h = F.relu(self.conv11_1(h))
+        h = self.conv11_1_dp(h)
         h = F.relu(self.conv11_2(h))
+        h = self.conv11_2_dp(h)
         hs.append(h)  # conv11_2
 
         loc_preds, conf_preds = self.multibox(hs)
