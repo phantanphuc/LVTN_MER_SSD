@@ -139,7 +139,7 @@ class MainWindow:
 
 				for i in range(BB_count):
 					idx = i * 5
-					BB_list.append((int(data_list[idx]), int(data_list[idx + 1]), int(data_list[idx + 2]), int(data_list[idx + 3]), int(data_list[idx + 4])))
+					BB_list.append((int(float(data_list[idx])), int(float(data_list[idx + 1])), int(float(data_list[idx + 2])), int(float(data_list[idx + 3])), int(float(data_list[idx + 4]))))
 
 				#print(data)
 				self.file_list.append((fname, BB_list))

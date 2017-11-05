@@ -25,13 +25,13 @@ from torch.autograd import Variable
 
 ############ PARAM #########################3333
 
-use_cuda = True#torch.cuda.is_available()
+use_cuda = False#torch.cuda.is_available()
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
 epoch_count = 10
 
 learning_rate = 0.001
-resume = True
+resume = False
 
 batch_size = 2
 ####################################################
@@ -41,10 +41,10 @@ print('==> Preparing data..')
 transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
-trainset = ListDataset(root='./dataset/train', list_file='./voc_data/validate_strim.txt', train=True, transform=transform)
+trainset = ListDataset(root='./dataset/train', list_file='./voc_data/mytrain.txt', train=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
 
-testset = ListDataset(root='./dataset/train', list_file='./voc_data/validate_strim.txt', train=False, transform=transform)
+testset = ListDataset(root='./dataset/train', list_file='./voc_data/mytrain.txt', train=False, transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
 
 
@@ -103,6 +103,8 @@ def train(epoch):
 
         train_loss += loss.data[0]
         print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
+
+        quit()
 
 def test(epoch):
     print('\nTest')
