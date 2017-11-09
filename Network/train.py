@@ -42,10 +42,10 @@ transform = transforms.Compose([transforms.ToTensor(),
                                 transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
 trainset = ListDataset(root='./dataset/train', list_file='./voc_data/mytrain.txt', train=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, drop_last=True)
 
 testset = ListDataset(root='./dataset/train', list_file='./voc_data/mytrain.txt', train=False, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
+testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False,drop_last=True)
 
 
 net = SSD300()
