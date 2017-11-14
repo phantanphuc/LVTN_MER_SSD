@@ -182,3 +182,7 @@
 /Network/checkpoint/ssd.pth
 /Network/__pycache__/*.pyc
 /Network/checkpoint/ssd_convert.pth
+/Demo/Network/result
+/Demo/Network/result2
+/Demo/Network/abc.png
+/Demo/Network/__pycache__/*.pyc
