@@ -4,6 +4,9 @@ import torch
 import math
 import itertools
 
+import numpy
+numpy.set_printoptions(threshold=numpy.nan)
+
 class DataEncoder:
     def __init__(self):
         '''Compute default box sizes with scale and aspect transform.'''
@@ -111,7 +114,7 @@ class DataEncoder:
         conf = 1 + classes[max_idx]   # [8732,], background class = 0
         
 
-        iou[conf == 70] *= 2
+        iou[conf == 70] *= 1.2
 
 
         conf[iou<threshold] = 0       # background
