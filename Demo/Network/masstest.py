@@ -13,7 +13,7 @@ import os
 
 
 
-DRC = './../LVTN_MER_SSD-master(1)/LVTN_MER_SSD-master/Network/dataset/im2/'
+DRC = './../Exp_Test_BKNgoc/'
 
 
 
@@ -37,7 +37,7 @@ with open('./label.txt') as f:
 
 # Load model
 net = SSD300()
-checkpoint = torch.load('./../ssdtrain0511_11.pth')
+checkpoint = torch.load('./../5111_2Model 25.pth')
 checkpoint['net']
 net.load_state_dict(checkpoint['net'])
 net.eval()

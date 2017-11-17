@@ -175,6 +175,7 @@ class MainWindow:
 		for root, dirs, files in os.walk(self.file_path):
 			#self.pending_file_list = files
 			#self.box_remaining['values'] = self.pending_file_list
+			self.filelistbox.delete(0, tkinter.END)
 			for i in files:
 				self.filelistbox.insert(tkinter.END, i)
 			self.current_folder = root + '/'

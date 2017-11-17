@@ -611,6 +611,11 @@ class LatexGenerator:
 		if 'type' in node:
 			if node['type'] == 'literal':
 			
+				if node['symbol'] == 'integral':
+					return '\\int'
+				if node['symbol'] == '_Delta':
+					return '\\Delta'
+			
 				if node['symbol'] == 'ldots':
 					return '\\ldots'
 			

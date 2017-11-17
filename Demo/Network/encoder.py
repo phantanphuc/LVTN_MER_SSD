@@ -70,7 +70,7 @@ class DataEncoder:
         iou = inter / (area1 + area2 - inter)
         return iou
 
-    def encode(self, boxes, classes, threshold=0.5):
+    def encode(self, boxes, classes, threshold=0.2):
         '''Transform target bounding boxes and class labels to SSD boxes and classes.
 
         Match each object box to all the default boxes, pick the ones with the
@@ -112,7 +112,7 @@ class DataEncoder:
         conf[iou<threshold] = 0       # background
         return loc, conf
 
-    def nms(self, bboxes, scores, threshold=0.5, mode='union'):
+    def nms(self, bboxes, scores, threshold=0.15, mode='union'):
         '''Non maximum suppression.
 
         Args:

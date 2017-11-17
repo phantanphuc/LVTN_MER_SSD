@@ -48,7 +48,7 @@ class SSD_Core:
 	def generatePrediction(self, imgpath):
 		
 		# Load test image
-		img = Image.open(imgpath)
+		img = Image.open(imgpath).convert('L')
 		img1 = img.resize((300,300))
 		
 		img1 = self.transform(img1)
