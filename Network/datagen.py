@@ -58,7 +58,7 @@ class ListDataset(data.Dataset):
                 xmax = splited[4+5*i]
                 ymax = splited[5+5*i]
                 c = splited[6+5*i]
-                box.append(z[float(xmin),float(ymin),float(xmax),float(ymax)])
+                box.append([float(xmin),float(ymin),float(xmax),float(ymax)])
                 label.append(int(c))
             self.boxes.append(torch.Tensor(box))
             self.labels.append(torch.LongTensor(label))
