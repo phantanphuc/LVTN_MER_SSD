@@ -186,3 +186,6 @@
 /Demo/Network/result2
 /Demo/Network/abc.png
 /Demo/Network/__pycache__/*.pyc
+/Network_2_fordebug/model/ssd.pth
+/Network_2_fordebug/model/ssdtrain0511_11.pth
+/Network_2_fordebug/*.pyc
