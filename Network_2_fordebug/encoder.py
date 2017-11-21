@@ -23,13 +23,18 @@ class DataEncoder:
             steps_raw = (8, 16, 32, 64, 80, 133, 400)
             aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
         
+        elif NetworkConfig.input_image_size - 500. < 2:
+            feature_map_sizes = (63, 32, 16, 8, 4, 2, 1) #SSD400
+            steps_raw = (8, 16, 32, 64, 128, 250, 500)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
+
         elif NetworkConfig.input_image_size - 600. < 2:
             feature_map_sizes = (75, 38, 19, 10, 8, 6, 4, 2) #SSD400
             steps_raw = (8, 16, 32, 60, 75, 100, 150, 300)
             aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2, 3), (2,), (2,), (2, ))
         
 
-        scale = NetworkConfig.input_image_size
+        scale = float(NetworkConfig.input_image_size)
 
 
         
@@ -167,7 +172,7 @@ class DataEncoder:
 
         return loc, conf
 
-    def nms(self, bboxes, scores, threshold=0.5, mode='union'):
+    def nms(self, bboxes, scores, threshold=0.4, mode='union'):
         '''Non maximum suppression.
 
         Args:

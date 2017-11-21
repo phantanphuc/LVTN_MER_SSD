@@ -55,8 +55,13 @@ class SSD300(nn.Module):
 
         self.conv10_1 = nn.Conv2d(256, 128, kernel_size=1)
         self.conv10_1_dp = nn.Dropout2d(p = 0.2)
-        self.conv10_2 = nn.Conv2d(128, 256, kernel_size=3)
-        self.conv10_2_dp = nn.Dropout2d(p = 0.2)
+
+        if abs (NetworkConfig.input_image_size - 500.) < 1:
+            self.conv10_2 = nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=2)
+            self.conv10_2_dp = nn.Dropout2d(p = 0.2)
+        else:
+            self.conv10_2 = nn.Conv2d(128, 256, kernel_size=3)
+            self.conv10_2_dp = nn.Dropout2d(p = 0.2)
 
         self.conv11_1 = nn.Conv2d(256, 128, kernel_size=1)
         self.conv11_1_dp = nn.Dropout2d(p = 0.2)
@@ -70,6 +75,12 @@ class SSD300(nn.Module):
             self.conv12_1 = nn.Conv2d(256, 128, kernel_size=1)
             self.conv12_1_dp = nn.Dropout2d(p = 0.2)
             self.conv12_2 = nn.Conv2d(128, 256, kernel_size=3)
+            self.conv12_2_dp = nn.Dropout2d(p = 0.2)
+
+        elif NetworkConfig.input_image_size - 500. < 2:
+            self.conv12_1 = nn.Conv2d(256, 128, kernel_size=1)
+            self.conv12_1_dp = nn.Dropout2d(p = 0.2)
+            self.conv12_2 = nn.Conv2d(128, 256, kernel_size=2)
             self.conv12_2_dp = nn.Dropout2d(p = 0.2)
 
         elif NetworkConfig.input_image_size - 600. < 2:
@@ -90,7 +101,7 @@ class SSD300(nn.Module):
         hs = []
         h = self.base(x)
 
-        print(h.data.numpy().shape)
+        #print(h.data.numpy().shape)
         
         hs.append(self.norm4(h))  # conv4_3
 
@@ -104,19 +115,19 @@ class SSD300(nn.Module):
         h = F.relu(self.conv6(h))
         h = F.relu(self.conv7(h))
         
-        print(h.data.numpy().shape)
+        #print(h.data.numpy().shape)
         hs.append(h)  # conv7
 
         h = F.relu(self.conv8_1(h))
         h = F.relu(self.conv8_2(h))
 
-        print(h.data.numpy().shape)
+        #print(h.data.numpy().shape)
         hs.append(h)  # conv8_2
 
         h = F.relu(self.conv9_1(h))
         h = F.relu(self.conv9_2(h))
 
-        print(h.data.numpy().shape)
+        #print(h.data.numpy().shape)
         hs.append(h)  # conv9_2
 
         h = F.relu(self.conv10_1(h))
@@ -124,7 +135,7 @@ class SSD300(nn.Module):
         h = F.relu(self.conv10_2(h))
         h = self.conv10_2_dp(h)
 
-        print(h.data.numpy().shape)
+        #print(h.data.numpy().shape)
         hs.append(h)  # conv10_2
 
         h = F.relu(self.conv11_1(h))
@@ -132,11 +143,21 @@ class SSD300(nn.Module):
         h = F.relu(self.conv11_2(h))
         h = self.conv11_2_dp(h)
 
-        print(h.data.numpy().shape)
+        #print(h.data.numpy().shape)
         hs.append(h)  # conv11_2
 
 
         if abs(NetworkConfig.input_image_size - 400.) < 1:
+
+            h = F.relu(self.conv12_1(h))
+            h = self.conv12_1_dp(h)
+            h = F.relu(self.conv12_2(h))
+            h = self.conv12_2_dp(h)
+
+            #print(h.data.numpy().shape)
+            hs.append(h)  # conv11_2
+
+        if abs(NetworkConfig.input_image_size - 500.) < 1:
 
             h = F.relu(self.conv12_1(h))
             h = self.conv12_1_dp(h)
@@ -153,7 +174,7 @@ class SSD300(nn.Module):
             h = F.relu(self.conv12_2(h))
             h = self.conv12_2_dp(h)
 
-            print(h.data.numpy().shape)
+            #print(h.data.numpy().shape)
             hs.append(h)  # conv11_2
 
             h = F.relu(self.conv13_1(h))
@@ -161,7 +182,7 @@ class SSD300(nn.Module):
             h = F.relu(self.conv13_2(h))
             h = self.conv13_2_dp(h)
 
-            print(h.data.numpy().shape)
+            #print(h.data.numpy().shape)
             hs.append(h)  # conv11_2
 
             #quit()
