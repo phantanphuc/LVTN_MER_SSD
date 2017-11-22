@@ -236,13 +236,32 @@ class DataEncoder:
           boxes: (tensor) bbox locations, sized [#obj, 4].
           labels: (tensor) class labels, sized [#obj,1].
         '''
+#        pdb.set_trace()
         variances = [0.1, 0.2]
         wh = torch.exp(loc[:,2:]*variances[1]) * self.default_boxes[:,2:]
         cxcy = loc[:,:2] * variances[0] * self.default_boxes[:,2:] + self.default_boxes[:,:2]
         boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)  # [8732,4]
 
         max_conf, labels = conf.max(1)  # [8732,1]
-        ids = labels.squeeze(1).nonzero().squeeze(1)  # [#boxes,]
-
-        keep = self.nms(boxes[ids], max_conf[ids].squeeze(1))
+#        pdb.set_trace()
+        ids = labels.squeeze(0).nonzero().squeeze(1)  # [#boxes,]
+#        pdb.set_trace()
+        keep = self.nms(boxes[ids], max_conf[ids].squeeze(0))
+#        pdb.set_trace()
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
+
+
+    def decodeforbatch(self, loc, conf):
+        batch_size = len(conf)
+        b_boxes = []
+        b_labels = []
+        b_scores = []
+        for b_id in range(batch_size):
+#            pdb.set_trace()
+            boxes, labels, scores = self.decode(loc[b_id,:,:], conf[b_id][:,:])
+            b_boxes.append(boxes)
+            b_labels.append(labels)
+            b_scores.append(scores)
+#            pdb.set_trace()
+#        pdb.set_trace()
+        return b_boxes, b_labels, b_scores 
