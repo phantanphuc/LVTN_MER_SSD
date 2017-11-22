@@ -104,28 +104,6 @@ class ListDataset(data.Dataset):
         loc_target, conf_target = self.data_encoder.encode(boxes, labels)
         return img, loc_target, conf_target
 
-    def random_flip(self, img, boxes):
-        '''Randomly flip the image and adjust the bbox locations.
-
-        For bbox (xmin, ymin, xmax, ymax), the flipped bbox is:
-        (w-xmax, ymin, w-xmin, ymax).
-
-        Args:
-          img: (PIL.Image) image.
-          boxes: (tensor) bbox locations, sized [#obj, 4].
-
-        Returns:
-          img: (PIL.Image) randomly flipped image.
-          boxes: (tensor) randomly flipped bbox locations, sized [#obj, 4].
-        '''
-        if random.random() < 0.5:
-            img = img.transpose(Image.FLIP_LEFT_RIGHT)
-            w = img.width
-            xmin = w - boxes[:,2]
-            xmax = w - boxes[:,0]
-            boxes[:,0] = xmin
-            boxes[:,2] = xmax
-        return img, boxes
 
     def random_crop(self, img, boxes, labels):
         '''Randomly crop the image and adjust the bbox locations.

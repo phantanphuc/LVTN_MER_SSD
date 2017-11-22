@@ -4,6 +4,9 @@ import torch
 import math
 import itertools
 
+import numpy
+numpy.set_printoptions(threshold=numpy.nan)
+
 class DataEncoder:
     def __init__(self):
         '''Compute default box sizes with scale and aspect transform.'''
@@ -109,7 +112,22 @@ class DataEncoder:
         loc = torch.cat([cxcy, wh], 1)  # [8732,4]
 
         conf = 1 + classes[max_idx]   # [8732,], background class = 0
+        
+
+        iou[conf == 70] *= 1.2
+
+
         conf[iou<threshold] = 0       # background
+
+        #print(conf.numpy())
+        #idx = numpy.zeros(150)
+        #for i in conf:
+        #    idx[i] += 1
+        #for i in range(150):
+        #    if (idx[i] > 0.5):
+        #        print(i, idx[i])
+        #quit()
+
         return loc, conf
 
     def nms(self, bboxes, scores, threshold=0.5, mode='union'):
