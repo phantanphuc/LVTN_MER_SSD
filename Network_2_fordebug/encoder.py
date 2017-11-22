@@ -1,18 +1,59 @@
 '''Encode target locations and labels.'''
 import torch
-import numpy as np
+
 import math
 import itertools
-import pdb
+
+import NetworkConfig
+
+import numpy
+numpy.set_printoptions(threshold=numpy.nan)
 
 class DataEncoder:
     def __init__(self):
         '''Compute default box sizes with scale and aspect transform.'''
-        scale = 300.
-        steps = [s / scale for s in (8, 16, 32, 64, 100, 300)]
-        sizes = [s / scale for s in (30, 60, 111, 162, 213, 264, 315)]
-        aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,))
-        feature_map_sizes = (38, 19, 10, 5, 3, 1)
+
+        if NetworkConfig.input_image_size - 300. < 2:
+            feature_map_sizes = (38, 19, 10, 5, 3, 1) #SSD300
+            steps_raw = (8, 16, 32, 64, 100, 300)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,))
+
+        elif NetworkConfig.input_image_size - 400. < 2:
+            feature_map_sizes = (50, 25, 13, 7, 5, 3, 1) #SSD400
+            steps_raw = (8, 16, 32, 64, 80, 133, 400)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
+        
+        elif NetworkConfig.input_image_size - 500. < 2:
+            feature_map_sizes = (63, 32, 16, 8, 4, 2, 1) #SSD400
+            steps_raw = (8, 16, 32, 64, 128, 250, 500)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
+
+        elif NetworkConfig.input_image_size - 600. < 2:
+            feature_map_sizes = (75, 38, 19, 10, 8, 6, 4, 2) #SSD400
+            steps_raw = (8, 16, 32, 60, 75, 100, 150, 300)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2, 3), (2,), (2,), (2, ))
+        
+
+        scale = float(NetworkConfig.input_image_size)
+
+
+        
+
+        min_ratio = 20
+        max_ratio = 90
+        step = int(math.floor((max_ratio - min_ratio) / (len(feature_map_sizes) - 2)))
+
+        sizes_raw = []
+        for ratio in range(min_ratio, max_ratio + 1 + step, step):
+            sizes_raw.append(scale * ratio / 100.)
+        sizes_raw = [scale * 10 / 100.] + sizes_raw
+
+        #print(sizes_raw)
+        #quit()
+            
+        steps = [s / scale for s in steps_raw]
+        sizes = [s / scale for s in sizes_raw]#(30, 60, 111, 162, 213, 264, 315)]
+        
 
         num_layers = len(feature_map_sizes)
 
@@ -34,7 +75,9 @@ class DataEncoder:
                     boxes.append((cx, cy, s * math.sqrt(ar), s / math.sqrt(ar)))
                     boxes.append((cx, cy, s / math.sqrt(ar), s * math.sqrt(ar)))
 
+
         self.default_boxes = torch.Tensor(boxes)
+
 
     def iou(self, box1, box2):
         '''Compute the intersection over union of two set of boxes, each box is [x1,y1,x2,y2].
@@ -87,6 +130,7 @@ class DataEncoder:
           boxes: (tensor) bounding boxes, sized [#obj, 8732, 4].
           classes: (tensor) class labels, sized [8732,]
         '''
+
         default_boxes = self.default_boxes
         num_default_boxes = default_boxes.size(0)
         num_objs = boxes.size(0)
@@ -110,10 +154,25 @@ class DataEncoder:
         loc = torch.cat([cxcy, wh], 1)  # [8732,4]
 
         conf = 1 + classes[max_idx]   # [8732,], background class = 0
+        
+
+        iou[conf == 70] *= 1.2
+
+
         conf[iou<threshold] = 0       # background
+
+        #print(conf.numpy())
+        #idx = numpy.zeros(150)
+        #for i in conf:
+        #    idx[i] += 1
+        #for i in range(150):
+        #    if (idx[i] > 0.5):
+        #        print(i, idx[i])
+        #quit()
+
         return loc, conf
 
-    def nms(self, bboxes, scores, threshold=0.5, mode='union'):
+    def nms(self, bboxes, scores, threshold=0.4, mode='union'):
         '''Non maximum suppression.
 
         Args:
@@ -177,31 +236,13 @@ class DataEncoder:
           boxes: (tensor) bbox locations, sized [#obj, 4].
           labels: (tensor) class labels, sized [#obj,1].
         '''
-#        pdb.set_trace()
         variances = [0.1, 0.2]
         wh = torch.exp(loc[:,2:]*variances[1]) * self.default_boxes[:,2:]
         cxcy = loc[:,:2] * variances[0] * self.default_boxes[:,2:] + self.default_boxes[:,:2]
         boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)  # [8732,4]
 
         max_conf, labels = conf.max(1)  # [8732,1]
-#        pdb.set_trace()
-        ids = labels.squeeze(0).nonzero().squeeze(1)  # [#boxes,]
-#        pdb.set_trace()
-        keep = self.nms(boxes[ids], max_conf[ids].squeeze(0))
-#        pdb.set_trace()
+        ids = labels.squeeze(1).nonzero().squeeze(1)  # [#boxes,]
+
+        keep = self.nms(boxes[ids], max_conf[ids].squeeze(1))
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
-    
-    def decodeforbatch(self, loc, conf):
-        batch_size = len(conf)
-        b_boxes = []
-        b_labels = []
-        b_scores = []
-        for b_id in range(batch_size):
-#            pdb.set_trace()
-            boxes, labels, scores = self.decode(loc[b_id,:,:], conf[b_id][:,:])
-            b_boxes.append(boxes)
-            b_labels.append(labels)
-            b_scores.append(scores)
-#            pdb.set_trace()
-#        pdb.set_trace()
-        return b_boxes, b_labels, b_scores 
