@@ -19,11 +19,11 @@ from multibox_loss import MultiBoxLoss
 
 from torch.autograd import Variable
 
-
+import numpy
 
 ############ PARAM #########################3333
 
-use_cuda = False#torch.cuda.is_available()
+use_cuda = True#torch.cuda.is_available()
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
 epoch_count = 10
@@ -57,7 +57,7 @@ if use_cuda:
 
 if resume:
     print('==> Resuming from checkpoint..')
-    checkpoint = torch.load('./model/ssdtrain0511_11.pth')
+    checkpoint = torch.load('./checkpoint/ckpt4.pth')
     net.load_state_dict(checkpoint['net'])
     best_loss = checkpoint['loss']
     start_epoch = checkpoint['epoch']
@@ -77,6 +77,11 @@ def train(epoch):
     net.train()
     train_loss = 0
     for batch_idx, (images, loc_targets, conf_targets) in enumerate(trainloader):
+
+        if (numpy.max(conf_targets.numpy()) == 0):
+            continue
+
+
         if use_cuda:
             images = images.cuda()
             loc_targets = loc_targets.cuda()
@@ -99,16 +104,13 @@ def train(epoch):
 
         loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
 
-        try:
-            loss.backward()
-        except:
-            print('err')
+        loss.backward()
         optimizer.step()
 
         train_loss += loss.data[0]
         print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
 
-        #quit()
+        #quit()    
 
 def test(epoch):
     print('\nTest')
@@ -141,7 +143,7 @@ def test(epoch):
         }
         if not os.path.isdir('checkpoint'):
             os.mkdir('checkpoint')
-        torch.save(state, './checkpoint/ckpt.pth')
+        torch.save(state, './checkpoint/ckpt_2_' + str(epoch % 5) +'.pth')
         best_loss = test_loss
 
 
