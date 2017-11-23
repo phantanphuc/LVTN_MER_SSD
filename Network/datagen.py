@@ -19,9 +19,10 @@ import torchvision.transforms as transforms
 from encoder import DataEncoder
 from PIL import Image, ImageOps
 
+import NetworkConfig
 
 class ListDataset(data.Dataset):
-    img_size = 300
+    img_size = NetworkConfig.input_image_size
 
     def __init__(self, root, list_file, train, transform):
         '''
@@ -102,6 +103,8 @@ class ListDataset(data.Dataset):
 
         # Encode loc & conf targets.
         loc_target, conf_target = self.data_encoder.encode(boxes, labels)
+
+
         return img, loc_target, conf_target
 
 

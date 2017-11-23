@@ -13,8 +13,23 @@ import NetworkConfig
 
 class MultiBoxLayer(nn.Module):
     num_classes = NetworkConfig.NUM_OF_CLASSES
-    num_anchors = [4,6,6,6,4,4]
-    in_planes = [512,1024,512,256,256,256]
+
+    if NetworkConfig.input_image_size - 300. < 2:
+        num_anchors = [4,6,6,6,4,4]
+        in_planes = [512,1024,512,256,256,256]
+
+    elif NetworkConfig.input_image_size - 400. < 2:
+        num_anchors = [4,6,6,6,4,4,4]
+        in_planes = [512,1024,512,256,256,256,256]
+
+    elif NetworkConfig.input_image_size - 500. < 2:
+        num_anchors = [4,6,6,6,4,4,4]
+        in_planes = [512,1024,512,256,256,256,256]
+
+    elif NetworkConfig.input_image_size - 600. < 2:
+        num_anchors = [4,6,6,6,6,4,4,4]
+        in_planes = [512,1024,512,256,256,256,256, 256]
+
 
     def __init__(self):
         super(MultiBoxLayer, self).__init__()

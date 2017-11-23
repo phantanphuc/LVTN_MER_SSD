@@ -4,17 +4,56 @@ import torch
 import math
 import itertools
 
+import NetworkConfig
+
 import numpy
 numpy.set_printoptions(threshold=numpy.nan)
 
 class DataEncoder:
     def __init__(self):
         '''Compute default box sizes with scale and aspect transform.'''
-        scale = 300.
-        steps = [s / scale for s in (8, 16, 32, 64, 100, 300)]
-        sizes = [s / scale for s in (30, 60, 111, 162, 213, 264, 315)]
-        aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,))
-        feature_map_sizes = (38, 19, 10, 5, 3, 1)
+
+        if NetworkConfig.input_image_size - 300. < 2:
+            feature_map_sizes = (38, 19, 10, 5, 3, 1) #SSD300
+            steps_raw = (8, 16, 32, 64, 100, 300)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,))
+
+        elif NetworkConfig.input_image_size - 400. < 2:
+            feature_map_sizes = (50, 25, 13, 7, 5, 3, 1) #SSD400
+            steps_raw = (8, 16, 32, 64, 80, 133, 400)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
+        
+        elif NetworkConfig.input_image_size - 500. < 2:
+            feature_map_sizes = (63, 32, 16, 8, 4, 2, 1) #SSD400
+            steps_raw = (8, 16, 32, 64, 128, 250, 500)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
+
+        elif NetworkConfig.input_image_size - 600. < 2:
+            feature_map_sizes = (75, 38, 19, 10, 8, 6, 4, 2) #SSD400
+            steps_raw = (8, 16, 32, 60, 75, 100, 150, 300)
+            aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2, 3), (2,), (2,), (2, ))
+        
+
+        scale = float(NetworkConfig.input_image_size)
+
+
+        
+
+        min_ratio = 20
+        max_ratio = 90
+        step = int(math.floor((max_ratio - min_ratio) / (len(feature_map_sizes) - 2)))
+
+        sizes_raw = []
+        for ratio in range(min_ratio, max_ratio + 1 + step, step):
+            sizes_raw.append(scale * ratio / 100.)
+        sizes_raw = [scale * 10 / 100.] + sizes_raw
+
+        #print(sizes_raw)
+        #quit()
+            
+        steps = [s / scale for s in steps_raw]
+        sizes = [s / scale for s in sizes_raw]#(30, 60, 111, 162, 213, 264, 315)]
+        
 
         num_layers = len(feature_map_sizes)
 
@@ -130,7 +169,7 @@ class DataEncoder:
 
         return loc, conf
 
-    def nms(self, bboxes, scores, threshold=0.5, mode='union'):
+    def nms(self, bboxes, scores, threshold=0.4, mode='union'):
         '''Non maximum suppression.
 
         Args:
@@ -204,3 +243,16 @@ class DataEncoder:
 
         keep = self.nms(boxes[ids], max_conf[ids].squeeze(1))
         return boxes[ids][keep], labels[ids][keep], max_conf[ids][keep]
+
+
+    def decodeforbatch(self, loc, conf):
+        batch_size = len(conf)
+        b_boxes = []
+        b_labels = []
+        b_scores = []
+        for b_id in range(batch_size):
+            boxes, labels, scores = self.decode(loc[b_id,:,:], conf[b_id][:,:])
+            b_boxes.append(boxes)
+            b_labels.append(labels)
+            b_scores.append(scores)
+        return b_boxes, b_labels, b_scores 
