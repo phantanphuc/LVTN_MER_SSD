@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import os
-import argparse
 import itertools
 
 import torch
@@ -19,134 +18,124 @@ from multibox_loss import MultiBoxLoss
 
 from torch.autograd import Variable
 
+from NetworkConfig import *
+
 import numpy
 
-############ PARAM #########################3333
+############ Variable #########################3333
 
-use_cuda = False#torch.cuda.is_available()
-best_loss = float('inf')  # best test loss
+best_loss = float('inf')  
 start_epoch = 0  # start from epoch 0 or last epoch
-epoch_count = 10
 
-learning_rate = 0.001
-resume = False
-
-batch_size = 1
 ####################################################
 
 # Data
 print('==> Preparing data..')
-transform = transforms.Compose([transforms.ToTensor(),
-                                transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 
-trainset = ListDataset(root='./dataset/train', list_file='./metafile/train.txt', train=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, drop_last=True)
+trainset = ListDataset(root=args.train_dir, list_file=args.train_meta, train=True, transform=transform)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
-testset = ListDataset(root='./dataset/train', list_file='./metafile/train.txt', train=False, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False,drop_last=True)
+testset = ListDataset(root=args.validate_dir, list_file=args.validate_meta, train=False, transform=transform)
+testloader = torch.utils.data.DataLoader(testset, batch_size=args.batch_size, shuffle=False,drop_last=True)
 
 
 net = SSD300()
 
-if use_cuda:
-    if resume:
-        pass
-        #net = torch.nn.DataParallel(net, device_ids=[0,1,2,3,4,5,6,7])
-    net.cuda()
-    cudnn.benchmark = True
+if args.use_cuda:
+	net.cuda()
+	cudnn.benchmark = True
 
-if resume:
-    print('==> Resuming from checkpoint..')
-    checkpoint = torch.load('./checkpoint/ckpt4.pth')
-    net.load_state_dict(checkpoint['net'])
-    best_loss = checkpoint['loss']
-    start_epoch = checkpoint['epoch']
-else:
-    #print(torch.load('./model/ssd.pth').keys())
-    pass
-    #net.load_state_dict(torch.load('./model/ssd.pth'))
+if args.resume_mode == 'continue':
+	print('==> Resuming from checkpoint..')
+	checkpoint = torch.load(args.resuming_model)
+	net.load_state_dict(checkpoint['net'])
+	best_loss = checkpoint['loss']
+	start_epoch = checkpoint['epoch']
+elif args.resume_mode == 'pretrain':
+	net.load_state_dict(torch.load(args.resuming_model))
 
 
 criterion = MultiBoxLoss()
 
-optimizer = optim.SGD(net.parameters(), lr=learning_rate, momentum=0.9, weight_decay=1e-4)
+optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=args.momentum, weight_decay=args.decay)
 
 # Training
 def train(epoch):
-    print('\nEpoch: %d' % epoch)
-    net.train()
-    train_loss = 0
-    for batch_idx, (images, loc_targets, conf_targets) in enumerate(trainloader):
+	print('\nEpoch: %d' % epoch)
+	net.train()
+	train_loss = 0
+	for batch_idx, (images, loc_targets, conf_targets) in enumerate(trainloader):
 
-        if (numpy.max(conf_targets.numpy()) == 0):
-            continue
-
-
-        if use_cuda:
-            images = images.cuda()
-            loc_targets = loc_targets.cuda()
-            conf_targets = conf_targets.cuda()
-
-        images = Variable(images)
-        loc_targets = Variable(loc_targets)
-        conf_targets = Variable(conf_targets)
-
-        optimizer.zero_grad()
+		if (numpy.max(conf_targets.numpy()) == 0):
+			continue
 
 
-        loc_preds, conf_preds = net(images)
+		if args.use_cuda:
+			images = images.cuda()
+			loc_targets = loc_targets.cuda()
+			conf_targets = conf_targets.cuda()
 
-        #print('------------------')
-        #print(loc_preds.data.numpy().shape)
-        #print(conf_preds.data.numpy().shape)
-        #print(loc_targets.data.numpy().shape)
-        #print(conf_targets.data.numpy().shape)
+		images = Variable(images)
+		loc_targets = Variable(loc_targets)
+		conf_targets = Variable(conf_targets)
 
-        loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
+		optimizer.zero_grad()
 
-        loss.backward()
-        optimizer.step()
 
-        train_loss += loss.data[0]
-        print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
+		loc_preds, conf_preds = net(images)
 
-        #quit()    
+		#print('------------------')
+		#print(loc_preds.data.numpy().shape)
+		#print(conf_preds.data.numpy().shape)
+		#print(loc_targets.data.numpy().shape)
+		#print(conf_targets.data.numpy().shape)
+
+		loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
+
+		loss.backward()
+		optimizer.step()
+
+		train_loss += loss.data[0]
+		print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
+
+		quit()	
 
 def test(epoch):
-    print('\nTest')
-    net.eval()
-    test_loss = 0
-    for batch_idx, (images, loc_targets, conf_targets) in enumerate(testloader):
-        if use_cuda:
-            images = images.cuda()
-            loc_targets = loc_targets.cuda()
-            conf_targets = conf_targets.cuda()
+	print('\nTest')
+	net.eval()
+	test_loss = 0
+	for batch_idx, (images, loc_targets, conf_targets) in enumerate(testloader):
+		if args.use_cuda:
+			images = images.cuda()
+			loc_targets = loc_targets.cuda()
+			conf_targets = conf_targets.cuda()
 
-        images = Variable(images, volatile=True)
-        loc_targets = Variable(loc_targets)
-        conf_targets = Variable(conf_targets)
+		images = Variable(images, volatile=True)
+		loc_targets = Variable(loc_targets)
+		conf_targets = Variable(conf_targets)
 
-        loc_preds, conf_preds = net(images)
-        loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
-        test_loss += loss.data[0]
-        print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))
+		loc_preds, conf_preds = net(images)
+		loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
+		test_loss += loss.data[0]
+		print('%.3f %.3f' % (loss.data[0], test_loss/(batch_idx+1)))
 
-    # Save checkpoint.
-    global best_loss
-    test_loss /= len(testloader)
-    if test_loss < best_loss:
-        print('Saving..')
-        state = {
-            'net': net.state_dict(),
-            'loss': test_loss,
-            'epoch': epoch,
-        }
-        if not os.path.isdir('checkpoint'):
-            os.mkdir('checkpoint')
-        torch.save(state, './checkpoint/ckpt_2_' + str(epoch % 5) +'.pth')
-        best_loss = test_loss
+	# Save checkpoint.
+	global best_loss
+	test_loss /= len(testloader)
+	if test_loss < best_loss:
+		print('Saving..')
+		state = {
+			'net': net.state_dict(),
+			'loss': test_loss,
+			'epoch': epoch,
+		}
+		if not os.path.isdir('checkpoint'):
+			os.mkdir('checkpoint')
+		torch.save(state, './checkpoint/ckpt_2_' + str(epoch % 5) +'.pth')
+		best_loss = test_loss
 
 
-for epoch in range(start_epoch, start_epoch + epoch_count):
-    train(epoch)
-    test(epoch)
+for epoch in range(start_epoch, start_epoch + args.epoch_count):
+	train(epoch)
+	test(epoch)

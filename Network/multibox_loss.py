@@ -9,10 +9,10 @@ import torch.nn.functional as F
 
 from torch.autograd import Variable
 
-import NetworkConfig
+from NetworkConfig import *
 
 class MultiBoxLoss(nn.Module):
-    num_classes = NetworkConfig.NUM_OF_CLASSES
+    num_classes = args.class_count
 
     def __init__(self):
         super(MultiBoxLoss, self).__init__()
@@ -35,8 +35,7 @@ class MultiBoxLoss(nn.Module):
 
         xmax = x.data.max()
         
-        if NetworkConfig.IS_USING_PYTHON_2:
-            
+        if args.using_python_2:
             log_sum_exp = torch.log(torch.sum(torch.exp(x-xmax), 1).view(-1, 1)) + xmax
         else:
             log_sum_exp = torch.log(torch.sum(torch.exp(x-xmax), 1)) + xmax
@@ -72,7 +71,7 @@ class MultiBoxLoss(nn.Module):
         num_pos = pos.long().sum(1)  # [N,1]
         num_neg = torch.clamp(3*num_pos, max=num_boxes-1)  # [N,1]
 
-        if NetworkConfig.IS_USING_PYTHON_2:
+        if args.using_python_2:
             neg = rank < num_neg.view(batch_size, 1).expand_as(rank)  # [N,8732]
         else:
             neg = rank < num_neg.expand_as(rank)  # [N,8732]

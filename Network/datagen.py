@@ -19,10 +19,10 @@ import torchvision.transforms as transforms
 from encoder import DataEncoder
 from PIL import Image, ImageOps
 
-import NetworkConfig
+from NetworkConfig import *
 
 class ListDataset(data.Dataset):
-    img_size = NetworkConfig.input_image_size
+    img_size = InputImgSize
 
     def __init__(self, root, list_file, train, transform):
         '''

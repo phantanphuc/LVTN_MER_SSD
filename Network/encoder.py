@@ -4,7 +4,7 @@ import torch
 import math
 import itertools
 
-import NetworkConfig
+from NetworkConfig import *
 
 import numpy
 numpy.set_printoptions(threshold=numpy.nan)
@@ -13,39 +13,39 @@ class DataEncoder:
     def __init__(self):
         '''Compute default box sizes with scale and aspect transform.'''
 
-        if NetworkConfig.input_image_size - 300. < 2:
-            feature_map_sizes = (38, 19, 10, 5, 3, 1) #SSD300
+        if Network_type == 0: #SSD 300
+            feature_map_sizes = (38, 19, 10, 5, 3, 1)
             steps_raw = (8, 16, 32, 64, 100, 300)
             aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,))
             min_ratio = 20
             max_ratio = 90
             min_scale = 0.1
 
-        elif NetworkConfig.input_image_size - 400. < 2:
-            feature_map_sizes = (50, 25, 13, 7, 5, 3, 1) #SSD400
+        elif Network_type == 1: # SSD 400 (deprecated)
+            feature_map_sizes = (50, 25, 13, 7, 5, 3, 1)
             steps_raw = (8, 16, 32, 64, 80, 133, 400)
             aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
             min_ratio = 20
             max_ratio = 90
             min_scale = 0.1
         
-        elif NetworkConfig.input_image_size - 500. < 2:
-            feature_map_sizes = (63, 32, 16, 8, 4, 2, 1) #SSD400
+        elif Network_type == 2: # SSD 500
+            feature_map_sizes = (63, 32, 16, 8, 4, 2, 1)
             steps_raw = (8, 16, 32, 64, 128, 250, 500)
             aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
             min_ratio = 8
             max_ratio = 50
             min_scale = 0.03
 
-        elif NetworkConfig.input_image_size - 600. < 2:
-            feature_map_sizes = (75, 38, 19, 10, 8, 6, 4, 2) #SSD400
+        elif Network_type == 3: # SSD 600 (Deprecated)
+            feature_map_sizes = (75, 38, 19, 10, 8, 6, 4, 2) 
             steps_raw = (8, 16, 32, 60, 75, 100, 150, 300)
             aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2, 3), (2,), (2,), (2, ))
             min_ratio = 20
             max_ratio = 90
             min_scale = 0.1
 
-        scale = float(NetworkConfig.input_image_size)
+        scale = float(InputImgSize)
 
 
         

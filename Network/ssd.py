@@ -10,7 +10,7 @@ from torch.autograd import Variable
 
 from multibox_layer import MultiBoxLayer
 
-import NetworkConfig
+from NetworkConfig import *
 
 class L2Norm2d(nn.Module):
     '''L2Norm layer across all channels.'''
@@ -20,7 +20,7 @@ class L2Norm2d(nn.Module):
 
     def forward(self, x, dim=1):
         '''out = scale * x / sqrt(\sum x_i^2)'''
-        if NetworkConfig.IS_USING_PYTHON_2:
+        if args.using_python_2:
             return self.scale * x * x.pow(2).sum(dim).clamp(min=1e-12).rsqrt().unsqueeze(1).expand_as(x)
         else:
             return self.scale * x * x.pow(2).sum(dim).clamp(min=1e-12).rsqrt().expand_as(x)
@@ -56,7 +56,7 @@ class SSD300(nn.Module):
         self.conv10_1 = nn.Conv2d(256, 128, kernel_size=1)
         self.conv10_1_dp = nn.Dropout2d(p = 0.2)
 
-        if abs (NetworkConfig.input_image_size - 500.) < 1:
+        if Network_type == 2:
             self.conv10_2 = nn.Conv2d(128, 256, kernel_size=3, padding=1, stride=2)
             self.conv10_2_dp = nn.Dropout2d(p = 0.2)
         else:
@@ -68,22 +68,22 @@ class SSD300(nn.Module):
         self.conv11_2 = nn.Conv2d(128, 256, kernel_size=3)
         self.conv11_2_dp = nn.Dropout2d(p = 0.2)
 
-        if NetworkConfig.input_image_size - 300. < 2:
+        if Network_type == 0:
             pass
 
-        elif NetworkConfig.input_image_size - 400. < 2:
+        elif Network_type == 1:
             self.conv12_1 = nn.Conv2d(256, 128, kernel_size=1)
             self.conv12_1_dp = nn.Dropout2d(p = 0.2)
             self.conv12_2 = nn.Conv2d(128, 256, kernel_size=3)
             self.conv12_2_dp = nn.Dropout2d(p = 0.2)
 
-        elif NetworkConfig.input_image_size - 500. < 2:
+        elif Network_type == 2:
             self.conv12_1 = nn.Conv2d(256, 128, kernel_size=1)
             self.conv12_1_dp = nn.Dropout2d(p = 0.2)
             self.conv12_2 = nn.Conv2d(128, 256, kernel_size=2)
             self.conv12_2_dp = nn.Dropout2d(p = 0.2)
 
-        elif NetworkConfig.input_image_size - 600. < 2:
+        elif Network_type == 3:
             self.conv12_1 = nn.Conv2d(256, 128, kernel_size=1)
             self.conv12_1_dp = nn.Dropout2d(p = 0.2)
             self.conv12_2 = nn.Conv2d(128, 256, kernel_size=3)
@@ -147,7 +147,7 @@ class SSD300(nn.Module):
         hs.append(h)  # conv11_2
 
 
-        if abs(NetworkConfig.input_image_size - 400.) < 1:
+        if Network_type == 1:
 
             h = F.relu(self.conv12_1(h))
             h = self.conv12_1_dp(h)
@@ -157,7 +157,7 @@ class SSD300(nn.Module):
             #print(h.data.numpy().shape)
             hs.append(h)  # conv11_2
 
-        if abs(NetworkConfig.input_image_size - 500.) < 1:
+        if Network_type == 2:
 
             h = F.relu(self.conv12_1(h))
             h = self.conv12_1_dp(h)
@@ -167,7 +167,7 @@ class SSD300(nn.Module):
             #print(h.data.numpy().shape)
             hs.append(h)  # conv11_2
 
-        if abs(NetworkConfig.input_image_size - 600.) < 1:
+        if Network_type == 3:
 
             h = F.relu(self.conv12_1(h))
             h = self.conv12_1_dp(h)

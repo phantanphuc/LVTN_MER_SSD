@@ -9,24 +9,26 @@ import torch.nn.functional as F
 
 from torch.autograd import Variable
 
-import NetworkConfig
+from NetworkConfig import *
+
+
 
 class MultiBoxLayer(nn.Module):
-    num_classes = NetworkConfig.NUM_OF_CLASSES
+    num_classes = args.class_count
 
-    if NetworkConfig.input_image_size - 300. < 2:
+    if Network_type == 0:
         num_anchors = [4,6,6,6,4,4]
         in_planes = [512,1024,512,256,256,256]
 
-    elif NetworkConfig.input_image_size - 400. < 2:
+    elif Network_type == 1:
         num_anchors = [4,6,6,6,4,4,4]
         in_planes = [512,1024,512,256,256,256,256]
 
-    elif NetworkConfig.input_image_size - 500. < 2:
+    elif Network_type == 2:
         num_anchors = [4,6,6,6,4,4,4]
         in_planes = [512,1024,512,256,256,256,256]
 
-    elif NetworkConfig.input_image_size - 600. < 2:
+    elif Network_type == 3:
         num_anchors = [4,6,6,6,6,4,4,4]
         in_planes = [512,1024,512,256,256,256,256, 256]
 
@@ -38,7 +40,7 @@ class MultiBoxLayer(nn.Module):
         self.conf_layers = nn.ModuleList()
         for i in range(len(self.in_planes)):
         	self.loc_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*4, kernel_size=3, padding=1))
-        	self.conf_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*NetworkConfig.NUM_OF_CLASSES, kernel_size=3, padding=1))
+        	self.conf_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i] * args.class_count, kernel_size=3, padding=1))
 
     def forward(self, xs):
         '''
@@ -60,7 +62,7 @@ class MultiBoxLayer(nn.Module):
 
             y_conf = self.conf_layers[i](x)
             y_conf = y_conf.permute(0,2,3,1).contiguous()
-            y_conf = y_conf.view(N,-1,NetworkConfig.NUM_OF_CLASSES)
+            y_conf = y_conf.view(N,-1, args.class_count)
             y_confs.append(y_conf)
 
         loc_preds = torch.cat(y_locs, 1)
