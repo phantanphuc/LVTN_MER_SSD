@@ -13,37 +13,7 @@ class DataEncoder:
 	def __init__(self):
 		'''Compute default box sizes with scale and aspect transform.'''
 
-		if Network_type == 0: #SSD 300
-			feature_map_sizes = (38, 19, 10, 5, 3, 1)
-			steps_raw = (8, 16, 32, 64, 100, 300)
-			aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,))
-			min_ratio = 20
-			max_ratio = 90
-			min_scale = 0.1
-
-		elif Network_type == 1: # SSD 400 (deprecated)
-			feature_map_sizes = (50, 25, 13, 7, 5, 3, 1)
-			steps_raw = (8, 16, 32, 64, 80, 133, 400)
-			aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
-			min_ratio = 20
-			max_ratio = 90
-			min_scale = 0.1
 		
-		elif Network_type == 2: # SSD 500
-			feature_map_sizes = (63, 32, 16, 8, 4, 2, 1)
-			steps_raw = (8, 16, 32, 64, 128, 250, 500)
-			aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
-			min_ratio = 8
-			max_ratio = 50
-			min_scale = 0.03
-
-		elif Network_type == 3: # SSD 600 (Deprecated)
-			feature_map_sizes = (75, 38, 19, 10, 8, 6, 4, 2) 
-			steps_raw = (8, 16, 32, 60, 75, 100, 150, 300)
-			aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2, 3), (2,), (2,), (2, ))
-			min_ratio = 20
-			max_ratio = 90
-			min_scale = 0.1
 
 		scale = float(InputImgSize)
 
@@ -57,7 +27,7 @@ class DataEncoder:
 		sizes_raw = [scale * min_scale] + sizes_raw
 			
 		steps = [s / scale for s in steps_raw]
-		sizes = [s / scale for s in sizes_raw]#(30, 60, 111, 162, 213, 264, 315)]
+		sizes = [s / scale for s in sizes_raw]
 		
 
 		num_layers = len(feature_map_sizes)
