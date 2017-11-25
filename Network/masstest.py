@@ -37,7 +37,7 @@ with open('./label.txt') as f:
 
 # Load model
 net = SSD300()
-checkpoint = torch.load('./model/ckpt_400.pth')
+checkpoint = torch.load('./model/ckpt_resize_scale_p2_500_4.pth')
 checkpoint['net']
 net.load_state_dict(checkpoint['net'])
 net.eval()
@@ -51,7 +51,7 @@ for a, b, c in os.walk(DRC):
 		try:
 			# Load test image
 			img = Image.open(DRC + file)
-			img1 = img.resize((400,400))
+			img1 = img.resize((500,500))
 			transform = transforms.Compose([transforms.ToTensor(),
 											transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 			img1 = transform(img1)
@@ -76,9 +76,9 @@ for a, b, c in os.walk(DRC):
 				draw.text((boxes[i][0], boxes[i][1]), dictindex[labels.numpy()[i, 0] - 1], font=ImageFont.truetype("./font/arial.ttf"))
 				#draw.text((boxes[i][0] * 300, boxes[i][1] * 300), dictindex[labels.numpy()[i, 0]], font=ImageFont.truetype("./font/arial.ttf"))
 
-			img.save('./result_new2/' + file)
+			img.save('./result_500_scalechanged/' + file)
 			
-		except :#ValueError as E:
+		except ValueError as E:
 			print('err')
 			
 

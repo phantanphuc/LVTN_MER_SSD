@@ -23,7 +23,7 @@ import numpy
 
 ############ PARAM #########################3333
 
-use_cuda = True#torch.cuda.is_available()
+use_cuda = False#torch.cuda.is_available()
 best_loss = float('inf')  # best test loss
 start_epoch = 0  # start from epoch 0 or last epoch
 epoch_count = 10
