@@ -130,9 +130,11 @@ def test(epoch):
 			'loss': test_loss,
 			'epoch': epoch,
 		}
-		if not os.path.isdir('checkpoint'):
-			os.mkdir('checkpoint')
-		torch.save(state, './checkpoint/ckpt_2_' + str(epoch % 5) +'.pth')
+		if not os.path.isdir(args.output_directory):
+			os.mkdir(args.output_directory)
+			
+		save_path = args.output_format % (epoch % args.epoch_cycle)
+		torch.save(state, save_path)
 		best_loss = test_loss
 
 

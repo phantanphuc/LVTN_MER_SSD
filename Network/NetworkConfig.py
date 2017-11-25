@@ -34,7 +34,11 @@ parser.add_argument('--validate_meta', default='./metafile/train.txt', type=str,
 
 parser.add_argument('--resuming_model', default='./model/ssd.pth', type=str, help='Model to load (Only valid for resume_mode: pretrain and continue)')
 
+parser.add_argument('--output_directory', default='./checkpoint', type=str, help='Output model directory')
+parser.add_argument('--output_format', default='ckpt_%d.pth', type=str, help='Format of output model\'s name, this file must contain symbol %%d for indexing purpose [For example: ckpt_%%d.pth]')
+
 ######### MISC.
+parser.add_argument('--epoch_cycle', default=50, type=int, help='For output model name format')
 
 ##########################################################
 ################ PRE - INITIALIZATION ####################
@@ -50,6 +54,9 @@ if args.resuming_model == './model/ssd.pth':
 		print('Use are using network with resume_mode: pretrain')
 		print('Be sure to specify path of pretrain model using argument: --resuming_model or default path ./model/ssd.pth will be used')
 
+if '%d' not in args.output_format:
+	print('--output_format param must contain %d')
+	quit()
 
 ##############################
 #### NETWORK TYPE
@@ -68,4 +75,7 @@ elif args.network == 'SSD600':
 	Network_type = 3
 	InputImgSize = 600
 
-
+###########################################
+# Debugging session
+# H:\anaconda_3\Install\python train.py
+#
