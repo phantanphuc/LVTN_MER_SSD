@@ -5,6 +5,8 @@ import torchvision.transforms as transforms
 
 from torch.autograd import Variable
 
+from NetworkConfig import *
+
 from ssd import SSD300
 from encoder import DataEncoder
 from PIL import Image, ImageDraw, ImageFont
@@ -13,7 +15,7 @@ import os
 
 
 
-DRC = './../../demo_3/Exp_Test1_contributors/'
+DRC = args.test_dir
 
 
 
@@ -29,15 +31,8 @@ with open('./label.txt') as f:
 
 		dictindex.append(split[0])
 
-		#dictionary[split[0]] = int(split[1])
-
-#print(dictindex[90])
-
-#quit()
-
-# Load model
 net = SSD300()
-checkpoint = torch.load('./model/ckpt_resize_scale_p2_500_4.pth')
+checkpoint = torch.load(args.test_model)
 checkpoint['net']
 net.load_state_dict(checkpoint['net'])
 net.eval()
@@ -46,12 +41,10 @@ net.eval()
 
 for a, b, c in os.walk(DRC):
 	for file in c:
-
-
 		try:
 			# Load test image
-			img = Image.open(DRC + file)
-			img1 = img.resize((500,500))
+			img = Image.open(DRC + '/' + file)
+			img1 = img.resize((InputImgSize,InputImgSize))
 			transform = transforms.Compose([transforms.ToTensor(),
 											transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
 			img1 = transform(img1)
@@ -74,9 +67,10 @@ for a, b, c in os.walk(DRC):
 				draw.rectangle(list(boxes[i]), outline='red')
 
 				draw.text((boxes[i][0], boxes[i][1]), dictindex[labels.numpy()[i, 0] - 1], font=ImageFont.truetype("./font/arial.ttf"))
-				#draw.text((boxes[i][0] * 300, boxes[i][1] * 300), dictindex[labels.numpy()[i, 0]], font=ImageFont.truetype("./font/arial.ttf"))
 
-			img.save('./result_500_scalechanged/' + file)
+
+			print('saving to: ' + args.output_dir + '/' + file)
+			img.save(args.output_dir + '/' + file)
 			
 		except ValueError as E:
 			print('err')
