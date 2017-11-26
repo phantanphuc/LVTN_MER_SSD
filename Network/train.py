@@ -2,30 +2,29 @@ from __future__ import print_function
 
 import os
 import itertools
-
+import numpy
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
-
 import torchvision
 import torchvision.transforms as transforms
+from torch.autograd import Variable
 
+
+from NetworkConfig import *
 from ssd import SSD300
 from datagen import ListDataset
 from multibox_loss import MultiBoxLoss
 
-from torch.autograd import Variable
 
-from NetworkConfig import *
-
-import numpy
 
 ############ Variable #########################3333
 
 best_loss = float('inf')  
 start_epoch = 0  # start from epoch 0 or last epoch
+current_best_model = ''
 
 ####################################################
 
@@ -99,7 +98,6 @@ def train(epoch):
 		train_loss += loss.data[0]
 		print('%.3f %.3f' % (loss.data[0], train_loss/(batch_idx+1)))
 
-		quit()	
 
 def test(epoch):
 	print('\nTest')
@@ -122,6 +120,8 @@ def test(epoch):
 
 	# Save checkpoint.
 	global best_loss
+	global current_best_model
+
 	test_loss /= len(testloader)
 	if test_loss < best_loss:
 		print('Saving..')
@@ -133,7 +133,9 @@ def test(epoch):
 		if not os.path.isdir(args.output_directory):
 			os.mkdir(args.output_directory)
 			
-		save_path = args.output_format % (epoch % args.epoch_cycle)
+
+		current_best_model = args.output_format % (epoch % args.epoch_cycle)
+		save_path = args.output_directory + '/' + current_best_model
 		torch.save(state, save_path)
 		best_loss = test_loss
 
@@ -141,3 +143,7 @@ def test(epoch):
 for epoch in range(start_epoch, start_epoch + args.epoch_count):
 	train(epoch)
 	test(epoch)
+	#quit()
+
+#-------- UPLOADING --------------------
+
