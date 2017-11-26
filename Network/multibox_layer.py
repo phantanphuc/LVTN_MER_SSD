@@ -16,31 +16,15 @@ from NetworkConfig import *
 class MultiBoxLayer(nn.Module):
 	num_classes = args.class_count
 
-	if Network_type == 0:
-		num_anchors = [4,6,6,6,4,4]
-		in_planes = [512,1024,512,256,256,256]
-
-	elif Network_type == 1:
-		num_anchors = [4,6,6,6,4,4,4]
-		in_planes = [512,1024,512,256,256,256,256]
-
-	elif Network_type == 2:
-		num_anchors = [4,6,6,6,4,4,4]
-		in_planes = [512,1024,512,256,256,256,256]
-
-	elif Network_type == 3:
-		num_anchors = [4,6,6,6,6,4,4,4]
-		in_planes = [512,1024,512,256,256,256,256, 256]
-
 
 	def __init__(self):
 		super(MultiBoxLayer, self).__init__()
 
 		self.loc_layers = nn.ModuleList()
 		self.conf_layers = nn.ModuleList()
-		for i in range(len(self.in_planes)):
-			self.loc_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i]*4, kernel_size=3, padding=1))
-			self.conf_layers.append(nn.Conv2d(self.in_planes[i], self.num_anchors[i] * args.class_count, kernel_size=3, padding=1))
+		for i in range(len(in_planes)):
+			self.loc_layers.append(nn.Conv2d(in_planes[i], num_anchors[i]*4, kernel_size=3, padding=1))
+			self.conf_layers.append(nn.Conv2d(in_planes[i], num_anchors[i] * args.class_count, kernel_size=3, padding=1))
 
 	def forward(self, xs):
 		'''

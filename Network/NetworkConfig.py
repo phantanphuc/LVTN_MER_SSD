@@ -85,6 +85,8 @@ if Network_type == 0: #SSD 300
 	max_ratio = 90
 	min_scale = 0.1
 
+	in_planes = [512,1024,512,256,256,256]
+
 elif Network_type == 1: # SSD 400 (deprecated)
 	feature_map_sizes = (50, 25, 13, 7, 5, 3, 1)
 	steps_raw = (8, 16, 32, 64, 80, 133, 400)
@@ -92,7 +94,9 @@ elif Network_type == 1: # SSD 400 (deprecated)
 	min_ratio = 20
 	max_ratio = 90
 	min_scale = 0.1
-		
+	
+	in_planes = [512,1024,512,256,256,256,256]
+
 elif Network_type == 2: # SSD 500
 	feature_map_sizes = (63, 32, 16, 8, 4, 2, 1)
 	steps_raw = (8, 16, 32, 64, 128, 250, 500)
@@ -100,6 +104,8 @@ elif Network_type == 2: # SSD 500
 	min_ratio = 8
 	max_ratio = 50
 	min_scale = 0.03
+
+	in_planes = [512,1024,512,256,256,256,256]
 
 elif Network_type == 3: # SSD 600 (Deprecated)
 	feature_map_sizes = (75, 38, 19, 10, 8, 6, 4, 2) 
@@ -109,6 +115,12 @@ elif Network_type == 3: # SSD 600 (Deprecated)
 	max_ratio = 90
 	min_scale = 0.1
 
+	in_planes = [512,1024,512,256,256,256,256, 256]
+
+num_anchors = []
+
+for aspectratio in aspect_ratios:
+	num_anchors.append(len(aspectratio) * 2 + 2)
 
 ###### For masstest
 if os.path.basename(__file__) != 'train.py':
