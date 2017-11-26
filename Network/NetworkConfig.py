@@ -18,13 +18,13 @@ parser = argparse.ArgumentParser(description='Single Shot MultiBox Detector Trai
 parser.add_argument('--lr', default=1e-3, type=float, help='learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
 parser.add_argument('--decay', default=1e-4, type=float, help='decay')
-parser.add_argument('--use_cuda', default=False, type=bool, help='Use CUDA for training')
+parser.add_argument('--use_cuda', default=True, type=bool, help='Use CUDA for training')
 parser.add_argument('--epoch_count', default=10, type=int, help='Number of training epoch')
 parser.add_argument('--batch_size', default=1, type=int, help='Batch size')
 parser.add_argument('--resume_mode', default='pretrain', type=str, help='Continue training mode: \'none\': From nothing,\'pretrain\': From pretrain model, \'continue\': Continue from SSD Model ')
 
 ######### Core Component
-parser.add_argument('--using_python_2', default=False, type=bool, help='Current python version')
+parser.add_argument('--using_python_2', default=True, type=bool, help='Current python version')
 parser.add_argument('--class_count', default=107, type=int, help='Number of classes')
 parser.add_argument('--network', default='SSD500', type=str, help='network type: \'SSD300\': use original SSD300, \'SSD500\': Improved version ')
 parser.add_argument('--resuming_model', default='./trainingmodel/ssd.pth', type=str, help='Model to load (Only valid for resume_mode: pretrain and continue)')
