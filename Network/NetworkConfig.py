@@ -100,7 +100,7 @@ elif Network_type == 1: # SSD 400 (deprecated)
 elif Network_type == 2: # SSD 500
 	feature_map_sizes = (63, 32, 16, 8, 4, 2, 1)
 	steps_raw = (8, 16, 32, 64, 128, 250, 500)
-	aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2,), (2,), (2,))
+	aspect_ratios = ((2,), (2,3), (2,3), (2,3), (2, ), (2, ), (2, ))
 	min_ratio = 8
 	max_ratio = 50
 	min_scale = 0.03
@@ -123,7 +123,9 @@ for aspectratio in aspect_ratios:
 	num_anchors.append(len(aspectratio) * 2 + 2)
 
 ###### For masstest
-if os.path.basename(__file__) != 'train.py':
+
+import sys
+if os.path.basename(sys.argv[0]) != 'train.py':
 
 	if not os.path.isdir(args.test_dir):
 
