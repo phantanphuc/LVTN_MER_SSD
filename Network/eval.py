@@ -41,7 +41,9 @@ resume = False
 batch_size = 2      
 dice_score = 0
 prec = np.zeros((2,106))
+num_sym = np.zeros((1,106))
 ite = 0
+count = 0 
 ####################################################
 
 # Data
@@ -64,7 +66,7 @@ if use_cuda:
 
 print('==> Resuming from checkpoint..')
 #    checkpoint = torch.load('./checkpoint/ssdtrain0511_12.pth')
-#5111_2Model 25.pth
+#5111_2Model 25.pth ckpt_resize_scale_p2_500_4
 checkpoint = torch.load('./model/ckpt_resize_scale_p2_500_4.pth', map_location=lambda storage, loc: storage)
 checkpoint['net']
 net.load_state_dict(checkpoint['net'])
@@ -74,6 +76,8 @@ def eval():
 	net.eval()
 	global dice_score
 	global ite 
+	global count
+	global num_sym 
 	target_boxes = testset.boxes
 #	print('target_boxes',target_boxes)
 	target_img = create_binaryImage(target_boxes, False)
@@ -133,6 +137,8 @@ def calculate_precision():
 	net.eval()
 	global dice_score
 	global ite 
+	global count
+	global num_sym
 	target_boxes = testset.boxes
 	target_labels = testset.labels
 	
@@ -146,7 +152,7 @@ def calculate_precision():
 		images = Variable(images, volatile=True)
 
 		loc_preds, conf_preds = net(images)
-		
+#		pdb.set_trace() 
 		data_encoder = DataEncoder()
 		conf_preds_list = []
 		for i in range(batch_size):
@@ -163,6 +169,8 @@ def calculate_precision():
 #					pdb.set_trace()
 					t_label = [item[0] for item in target_res]
 					la = predict_res[box_id][0]
+					num_sym[0][la] += len(predict_res[box_id][1])
+#					pdb.set_trace() 
 					if la in t_label:
 						predict_img = create_binaryImageforPrec(predict_res[box_id][1])
 #						pdb.set_trace()
@@ -177,10 +185,12 @@ def calculate_precision():
 #						print(prec[0][la])
 					else:
 						print('no exist in t_label')
+#						
 					prec[1][la] += 1 
 				
 		except:
 			print('err') 
+			count+=1 
 #			pdb.set_trace()
 	
 def find_boxescoreslabel(labels, boxes, isPred=True):
@@ -234,8 +244,12 @@ def create_binaryImageforPrec(boxes, isPred = True):
 #		img.show()
 	return img 
 for epoch in range(1):
-	eval()
-#	calculate_precision()
-print(dice_score/ite)
-#for i in range(106):
-#	print(prec[0][i]/float(prec[1][i]))
+#	eval()
+	calculate_precision()
+#print(dice_score/ite)
+for i in range(106):
+	print(prec[0][i]/float(prec[1][i]))
+print('num')
+for i in range(106):
+	print(num_sym[0][i]) 
+print(count)
